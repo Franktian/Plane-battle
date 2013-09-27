@@ -149,6 +149,34 @@
 		
 		}
 		, 250);
+		
+		function enermy() {
+			// Function for displaying enemy planes
+			
+			// Get a random position for the plane
+			px = Math.floor((Math.random()*800)+1)
+			py = 0
+			
+			// Create an enermy variable with random position
+			var enemy = new Kinetic.Circle({
+				x: px,
+				y: py,
+				radius: 5,
+				stroke: 'black',
+				strokeWidth: 5
+			});
+			layer.add(enemy);
+			var enemyAnim = new Kinetic.Animation(function(frame) {
+				  enemy.setY(enemy.getY() + 8);
+			}, layer);
+			enemyAnim.start();
+		};
+		
+		setInterval(function(){
+			enermy();
+		},300);
+
+		
 
     </script>
   </body>
