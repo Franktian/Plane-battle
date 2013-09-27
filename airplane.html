@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+		body {
+		margin: 0px;
+		padding: 0px;
+		}
+		#container {
+			margin-left: 20px;
+		}
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.5.5.min.js"></script>
+    <script defer="defer">
+		var stage = new Kinetic.Stage({
+			container: 'container',
+			width: 1024,
+			height: 600
+		});
+		var layer = new Kinetic.Layer();
+		var messageLayer = new Kinetic.Layer();
+		stage.add(messageLayer);
+		
+		
+		var body = new Kinetic.Rect({
+			x:stage.getWidth()/2,
+			y:stage.getHeight()/2,
+			width: 70,
+			height: 40,
+			
+			stroke: 'black',
+			strokeWidth: 4
+		});
+		
+		
+		layer.add(body);
+		stage.add(layer);
+		var background = new Kinetic.Rect({
+			x: 0,
+			y: 0,
+			width: stage.getWidth(),
+			height: stage.getHeight(),
+			stroke: 'black',
+			strokeWidth: 1
+		});
+		layer.add(background);
+		
+		
+		
+		
+		// Moving animation for body
+		var animRight = new Kinetic.Animation(function(frame) {
+			if (body.getX() <= stage.getAttr("width") - 80) {
+				body.setX(body.getX() + 5);
+			}  
+
+		}, layer);
+      
+		var animUp = new Kinetic.Animation(function(frame) {
+			if (body.getY() >= 10) {
+				body.setY(body.getY() - 5);
+			}
+
+		}, layer);
+      
+		var animLeft = new Kinetic.Animation(function(frame) {
+			if (body.getX() >= 10) {
+				body.setX(body.getX() - 5);
+			}
+
+		}, layer);
+	  
+	  var animDown = new Kinetic.Animation(function(frame) {
+		  if (body.getY() <= stage.getAttr("height") - 55) {
+			  body.setY(body.getY() + 5);
+		  }
+		  
+	  }, layer);
+		
+		// Event for control the body
+		window.addEventListener('keydown', function(e) {
+			switch (e.keyCode) {
+				case 37:
+					// Left
+					animLeft.start();
+					break;
+				case 38:
+					// Up
+					animUp.start();
+					break;
+				case 39:
+					// Right
+					animRight.start();
+					break;
+				case 40:
+					// Down
+					animDown.start();
+					break;
+			}
+		});
+      
+		window.addEventListener('keyup', function(e) {
+			switch (e.keyCode) {
+				case 37:
+					
+					animLeft.stop();
+					break;
+				case 38:
+					animUp.stop();
+					break;
+				case 39:
+					animRight.stop();
+					break;
+				case 40:
+					animDown.stop();
+					break;
+			}
+		});
+		
+		function writeMessage(messageLayer, message) {
+				var context = messageLayer.getContext();
+				messageLayer.clear();
+				context.font = '18pt Calibri';
+				context.fillStyle = 'black';
+				context.fillText(message, 50, 25);  // The position to be displayed on the stage
+		};
+		
+		
+	
+		window.setInterval(
+			function(){
+			var bullet = new Kinetic.Circle({
+				x:body.getX()+35,
+				y:body.getY(),
+				radius: 5,
+				fill: 'blue'
+			});
+			layer.add(bullet);
+			var animbullet = new Kinetic.Animation(function(frame) {
+			  bullet.setY( bullet.getY()-8);
+			  
+			}, layer);
+		
+		
+			animbullet.start();
+		
+		}
+		, 250);
+
+    </script>
+  </body>
+</html>
