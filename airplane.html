@@ -101,8 +101,7 @@
       
 		window.addEventListener('keyup', function(e) {
 			switch (e.keyCode) {
-				case 37:
-					
+				case 37:					
 					animLeft.stop();
 					break;
 				case 38:
@@ -126,9 +125,8 @@
 		};
 		
 		
-	
-		window.setInterval(
-			function(){
+		function bullet(){
+			//Create bullet
 			var bullet = new Kinetic.Circle({
 				x:body.getX(),
 				y:body.getY(),
@@ -136,6 +134,7 @@
 				fill: 'blue'
 			});
 			layer.add(bullet);
+			
 			var animbullet = new Kinetic.Animation(function(frame) {
 				// Once reaches the bound, remove bullet
 				if (bullet.getY() <= 50) {
@@ -144,12 +143,20 @@
 				bullet.setY( bullet.getY()-8);
 			}, layer);
 		
-		
+			this.collision(){bullet.remove();}
+			this.x(){return this.x;}
+			this.y(){return this.y;}
 			animbullet.start();
-		
+		}
+	
+		window.setInterval(
+			function(){
+				bullet();
 		}
 		, 250);
 		var bullets = [];
+		
+		
 		var enermies = [];
 		function enermy() {
 			// Function for displaying enemy planes
@@ -182,6 +189,7 @@
 					enemy.remove();
 				}
 				enemy.setY(enemy.getY() + 8);
+				
 			}, layer);
 			enemyAnim.start();
 		};
