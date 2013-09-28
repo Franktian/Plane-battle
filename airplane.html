@@ -25,12 +25,10 @@
 		stage.add(messageLayer);
 		
 		
-		var body = new Kinetic.Rect({
+		var body = new Kinetic.Circle({
 			x:stage.getWidth()/2,
 			y:stage.getHeight()/2,
-			width: 70,
-			height: 40,
-			
+			radius:50,
 			stroke: 'black',
 			strokeWidth: 4
 		});
@@ -41,9 +39,8 @@
 		var background = new Kinetic.Rect({
 			x: 0,
 			y: 0,
-			width: stage.getWidth(),
-			height: stage.getHeight(),
-			stroke: 'black',
+			width:stage.getWidth(),
+			height:stage.getHeight(),stroke: 'black',
 			strokeWidth: 1
 		});
 		layer.add(background);
@@ -133,15 +130,18 @@
 		window.setInterval(
 			function(){
 			var bullet = new Kinetic.Circle({
-				x:body.getX()+35,
+				x:body.getX(),
 				y:body.getY(),
 				radius: 5,
 				fill: 'blue'
 			});
 			layer.add(bullet);
 			var animbullet = new Kinetic.Animation(function(frame) {
-			  bullet.setY( bullet.getY()-8);
-			  
+				// Once reaches the bound, remove bullet
+				if (bullet.getY() <= 50) {
+					bullet.remove();
+				}
+				bullet.setY( bullet.getY()-8);
 			}, layer);
 		
 		
@@ -149,7 +149,8 @@
 		
 		}
 		, 250);
-		
+		var bullets = [];
+		var enermies = [];
 		function enermy() {
 			// Function for displaying enemy planes
 			
@@ -165,9 +166,22 @@
 				stroke: 'black',
 				strokeWidth: 5
 			});
-			layer.add(enemy);
+			layer.add(enemy); // Add the enemy variable to layer
+			
 			var enemyAnim = new Kinetic.Animation(function(frame) {
-				  enemy.setY(enemy.getY() + 8);
+				// Once reach bound, remove the enemy plane
+				if (enemy.getY() >= stage.getAttr("height") - 50){
+					enemy.remove();
+				}
+				
+				// Define the collision logic here
+				dx = Math.pow((enemy.getX() - body.getX()), 2);
+				dy = Math.pow((enemy.getY() - body.getY()), 2);
+				distance = Math.sqrt(dx + dy);
+				if (distance <= 50) {
+					enemy.remove();
+				}
+				enemy.setY(enemy.getY() + 8);
 			}, layer);
 			enemyAnim.start();
 		};
