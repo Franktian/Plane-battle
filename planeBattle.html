@@ -28,6 +28,7 @@
 		var bullets = [];  // Keep track of the bullets
 		var enemies = [];  // Keep track of the enemies
 		var enemiesAnim = []; // Keep track of the enemy animations
+		var points = 0;
 
 		var messageLayer = new Kinetic.Layer();
 		stage.add(messageLayer);
@@ -76,12 +77,11 @@
 
 		}, layer);
 	  
-	  var animDown = new Kinetic.Animation(function(frame) {
-		  if (body.getY() <= stage.getAttr("height") - 55) {
+		var animDown = new Kinetic.Animation(function(frame) {
+			if (body.getY() <= stage.getAttr("height") - 55) {
 			  body.setY(body.getY() + 5);
-		  }
-		  
-	  }, layer);
+			}
+		}, layer);
 		
 		// Event for control the body
 		window.addEventListener('keydown', function(e) {
@@ -103,6 +103,7 @@
 					animDown.start();
 					break;
 				case 32:
+					// Clear all the enemies
 					for (var i = 0; i < enemies.length; i++) {
 						enemies[i].remove();
 					}
@@ -127,6 +128,8 @@
 					break;
 				case 40:
 					animDown.stop();
+					break;
+				case 81:
 					break;
 			}
 		});
@@ -210,6 +213,8 @@
 						enemies.splice(enemies.indexOf(enemy), 1);
 						enemy.remove();
 						this.stop();
+						points += 1;
+						writeMessage(messageLayer, points);
 					}
 				}
 				enemy.setY(enemy.getY() + 3);
@@ -217,6 +222,32 @@
 			enemyAnim.start();
 			enemiesAnim.push(enemyAnim);
 		};
+		
+		function niubi() {
+			var angle = 0;
+			var bx = 0;
+			var by = 0;
+			for (var i = 0; i < 36; i++) {
+				angle = i * 10;
+				bx = 8 * Math.cos(angle * Math.PI / 180);
+				by = 8 * Math.sin(angle * Math.PI / 180);
+
+				var bullet = new Kinetic.Circle({
+					x:body.getX(),
+					y:body.getY(),
+					radius: 5,
+					fill: 'blue'
+				});
+				layer.add(bullet);
+				bullets.push(bullet);
+				var animbullet = new Kinetic.Animation(function(frame) {
+					// Once reaches the bound, remove bullet
+					bullet.setX(bullet.getX() + bx);
+					bullet.setY(bullet.getY() + by);
+				}, layer);
+				animbullet.start();
+			}
+		}
 		
 		setInterval(function(){
 			enermy();
