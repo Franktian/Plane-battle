@@ -28,6 +28,7 @@
 		var bullets = [];  // Keep track of the bullets
 		var enemies = [];  // Keep track of the enemies
 		var enemiesAnim = []; // Keep track of the enemy animations
+		var bulletsAnim = [];  // Keep track of the bullet animations
 		var points = 0;
 
 		var messageLayer = new Kinetic.Layer();
@@ -37,7 +38,7 @@
 		var body = new Kinetic.Circle({
 			x:stage.getWidth()/2,
 			y:stage.getHeight()/2,
-			radius:50,
+			radius:30,
 			stroke: 'black',
 			strokeWidth: 4
 		});
@@ -152,19 +153,37 @@
 				fill: 'blue'
 			});
 			layer.add(bullet);
-			bullets.push(bullet);
+			bullets.push(bullet);  // Add the bullet to the bullets list
 			var animbullet = new Kinetic.Animation(function(frame) {
 				// Once reaches the bound, remove bullet
-				bullet.setY( bullet.getY()-8);
+				bullet.setY( bullet.getY() - 10);
 				if (bullet.getY() <= 5) {
 					bullets.splice(bullets.indexOf(bullet), 1);
 					bullet.remove();
 					this.stop();
 				}
+				
+				// Check collision with the enemies
+				for (var i = 0; i < enemies.length; i++) {
+					// Get coordinate and distance of bullets and enemies
+					x1 = bullet.getX();
+					y1 = bullet.getY();
+					x2 = enemies[i].getX();
+					y2 = enemies[i].getY();
+					ddx =Math.pow((x1 - x2), 2);
+					ddy = Math.pow((y1 - y2), 2);
+					ddistance = Math.sqrt(ddx + ddy);
+					if (ddistance <= 20) {
+						// Enemy hit by bullets, remove enemy and stop the animation
+						// bullet.remove();
+						//bullets.splice(bullets.indexOf(bullet), 1);
+					}
+				}
+
 			}, layer);
 			animbullet.start();
 		}
-		, 150);
+		, 250);
 		function enermy() {
 			// Function for displaying enemy planes
 			
@@ -181,7 +200,7 @@
 				strokeWidth: 5
 			});
 			layer.add(enemy); // Add the enemy variable to layer
-			enemies.push(enemy);
+			enemies.push(enemy);  // Add the enemy to the enemies list
 			var enemyAnim = new Kinetic.Animation(function(frame) {
 				// Once reach bound, remove the enemy plane
 				if (enemy.getY() >= stage.getAttr("height") - 5){
@@ -193,10 +212,13 @@
 				dx = Math.pow((enemy.getX() - body.getX()), 2);
 				dy = Math.pow((enemy.getY() - body.getY()), 2);
 				distance = Math.sqrt(dx + dy);
-				if (distance <= 50) {
+				if (distance <= 30) {
 					enemies.splice(enemies.indexOf(enemy), 1);
 					enemy.remove();
 					this.stop();
+					points = 0;
+					writeMessage(messageLayer, points);
+					alert("You lose!!!!!!!");
 				}
 
 				for (var i = 0; i < bullets.length; i++) {
@@ -217,7 +239,7 @@
 						writeMessage(messageLayer, points);
 					}
 				}
-				enemy.setY(enemy.getY() + 3);
+				enemy.setY(enemy.getY() + 4);
 			}, layer);
 			enemyAnim.start();
 			enemiesAnim.push(enemyAnim);
@@ -248,7 +270,7 @@
 				animbullet.start();
 			}
 		}
-		
+
 		setInterval(function(){
 			enermy();
 		},100);
