@@ -15,6 +15,9 @@
     <div id="container"></div>
     <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.5.5.min.js"></script>
     <script defer="defer">
+		Array.prototype.remove = function(v){
+			delete this[this.indexOf(v)];
+		};
 		var stage = new Kinetic.Stage({
 			container: 'container',
 			width: 1024,
@@ -126,7 +129,8 @@
 		};
 		
 		
-	
+		var bullets = [];
+		var enemies = [];
 		window.setInterval(
 			function(){
 			var bullet = new Kinetic.Circle({
@@ -136,21 +140,17 @@
 				fill: 'blue'
 			});
 			layer.add(bullet);
+			bullets.push(bullet);
 			var animbullet = new Kinetic.Animation(function(frame) {
 				// Once reaches the bound, remove bullet
 				if (bullet.getY() <= 50) {
 					bullet.remove();
 				}
-				bullet.setY( bullet.getY()-8);
+				bullet.setY( bullet.getY()-8);				
 			}, layer);
-		
-		
 			animbullet.start();
-		
 		}
-		, 250);
-		var bullets = [];
-		var enermies = [];
+		, 150);
 		function enermy() {
 			// Function for displaying enemy planes
 			
@@ -167,13 +167,11 @@
 				strokeWidth: 5
 			});
 			layer.add(enemy); // Add the enemy variable to layer
-			
 			var enemyAnim = new Kinetic.Animation(function(frame) {
 				// Once reach bound, remove the enemy plane
 				if (enemy.getY() >= stage.getAttr("height") - 50){
 					enemy.remove();
 				}
-				
 				// Define the collision logic here
 				dx = Math.pow((enemy.getX() - body.getX()), 2);
 				dy = Math.pow((enemy.getY() - body.getY()), 2);
@@ -181,7 +179,20 @@
 				if (distance <= 50) {
 					enemy.remove();
 				}
-				enemy.setY(enemy.getY() + 8);
+
+				for (var i = 0; i < bullets.length; i++) {
+					x1 = enemy.getX();
+					y1 = enemy.getY();
+					x2 = bullets[i].getX();
+					y2 = bullets[i].getY();
+					ddx =Math.pow((x1 - x2), 2);
+					ddy = Math.pow((y1 - y2), 2);
+					ddistance = Math.sqrt(ddx + ddy);
+					if (ddistance <= 20) {
+						enemy.remove();
+					}
+				}
+				enemy.setY(enemy.getY() + 3);
 			}, layer);
 			enemyAnim.start();
 		};
@@ -189,8 +200,6 @@
 		setInterval(function(){
 			enermy();
 		},300);
-
-		
 
     </script>
   </body>
