@@ -104,7 +104,8 @@
       
 		window.addEventListener('keyup', function(e) {
 			switch (e.keyCode) {
-				case 37:					
+				case 37:
+					
 					animLeft.stop();
 					break;
 				case 38:
@@ -128,15 +129,10 @@
 		};
 		
 		
-<<<<<<< HEAD
 		var bullets = [];
 		var enemies = [];
 		window.setInterval(
 			function(){
-=======
-		function bullet(){
-			//Create bullet
->>>>>>> 613b6b45534fc4f5d0be069b15f324f8b3c49035
 			var bullet = new Kinetic.Circle({
 				x:body.getX(),
 				y:body.getY(),
@@ -144,11 +140,7 @@
 				fill: 'blue'
 			});
 			layer.add(bullet);
-<<<<<<< HEAD
 			bullets.push(bullet);
-=======
-			
->>>>>>> 613b6b45534fc4f5d0be069b15f324f8b3c49035
 			var animbullet = new Kinetic.Animation(function(frame) {
 				// Once reaches the bound, remove bullet
 				if (bullet.getY() <= 50) {
@@ -156,28 +148,9 @@
 				}
 				bullet.setY( bullet.getY()-8);				
 			}, layer);
-<<<<<<< HEAD
 			animbullet.start();
 		}
 		, 150);
-=======
-		
-			this.collision(){bullet.remove();}
-			this.x(){return this.x;}
-			this.y(){return this.y;}
-			animbullet.start();
-		}
-	
-		window.setInterval(
-			function(){
-				bullet();
-		}
-		, 250);
-		var bullets = [];
-		
-		
-		var enermies = [];
->>>>>>> 613b6b45534fc4f5d0be069b15f324f8b3c49035
 		function enermy() {
 			// Function for displaying enemy planes
 			
@@ -206,7 +179,6 @@
 				if (distance <= 50) {
 					enemy.remove();
 				}
-<<<<<<< HEAD
 
 				for (var i = 0; i < bullets.length; i++) {
 					x1 = enemy.getX();
@@ -221,10 +193,6 @@
 					}
 				}
 				enemy.setY(enemy.getY() + 3);
-=======
-				enemy.setY(enemy.getY() + 8);
-				
->>>>>>> 613b6b45534fc4f5d0be069b15f324f8b3c49035
 			}, layer);
 			enemyAnim.start();
 		};
