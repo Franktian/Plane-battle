@@ -130,7 +130,6 @@
 		
 		
 		var bullets = [];
-		var enemies = [];
 		window.setInterval(
 			function(){
 			var bullet = new Kinetic.Circle({
@@ -143,10 +142,12 @@
 			bullets.push(bullet);
 			var animbullet = new Kinetic.Animation(function(frame) {
 				// Once reaches the bound, remove bullet
-				if (bullet.getY() <= 50) {
+				bullet.setY( bullet.getY()-8);
+				if (bullet.getY() <= 5) {
+					bullets.splice(bullets.indexOf(bullet), 1);
 					bullet.remove();
+					this.stop();
 				}
-				bullet.setY( bullet.getY()-8);				
 			}, layer);
 			animbullet.start();
 		}
@@ -169,8 +170,9 @@
 			layer.add(enemy); // Add the enemy variable to layer
 			var enemyAnim = new Kinetic.Animation(function(frame) {
 				// Once reach bound, remove the enemy plane
-				if (enemy.getY() >= stage.getAttr("height") - 50){
+				if (enemy.getY() >= stage.getAttr("height") - 5){
 					enemy.remove();
+					this.stop();
 				}
 				// Define the collision logic here
 				dx = Math.pow((enemy.getX() - body.getX()), 2);
@@ -181,6 +183,7 @@
 				}
 
 				for (var i = 0; i < bullets.length; i++) {
+					// Get coordinate and distance of bullets and enemies
 					x1 = enemy.getX();
 					y1 = enemy.getY();
 					x2 = bullets[i].getX();
@@ -189,7 +192,9 @@
 					ddy = Math.pow((y1 - y2), 2);
 					ddistance = Math.sqrt(ddx + ddy);
 					if (ddistance <= 20) {
+						// Enemy hit by bullets, remove enemy and stop the animation
 						enemy.remove();
+						this.stop();
 					}
 				}
 				enemy.setY(enemy.getY() + 3);
@@ -199,8 +204,7 @@
 		
 		setInterval(function(){
 			enermy();
-		},300);
-
+		},100);
     </script>
   </body>
 </html>
