@@ -21,20 +21,13 @@ layer.add(background);
 
 var bodyObj = new Image();
 bodyObj.src = "pictures/plane.png";
-/* var body = new Kinetic.Circle({
-	x:stage.getWidth()/2,
-	y:stage.getHeight()/2,
-	radius:30,
-	stroke: 'black',
-	strokeWidth: 4
-});
- */
 var body = new Kinetic.Image({
 	x:stage.getWidth()/2,
 	y:stage.getHeight()/2,
 	image: bodyObj,
-	width: 30,
-	height: 40,
+	width: 60,
+	height: 80,
+	offset: [30, 40]
 });
  
 layer.add(body);
@@ -132,12 +125,12 @@ function createBullet(body, layer, angle) {
 	var bulletObj = new Image();
 	bulletObj.src = "pictures/bullet.png";
 	var bullet = new Kinetic.Image({
-		x:body.getX() + 15,
-		y:body.getY(),
+		x:body.getX() - 5,
+		y:body.getY() - 40,
 		image: bulletObj,
-		width: 8,
-		height: 20,
-		rotationDeg: angle - 90
+		width: 12,
+		height: 25,
+		rotationDeg: angle + 90
 	});
 	layer.add(bullet);
 	
