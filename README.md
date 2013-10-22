@@ -1,3 +1,3 @@
-feijidazhan
+Attack On Plane
 ===========
-The first practice project. Founding at University of Toronto
+Founding at University of Toronto
