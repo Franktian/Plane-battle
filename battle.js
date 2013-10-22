@@ -10,45 +10,35 @@ var enemiesAnim = []; // Keep track of the enemy animations
 var points = 0;  //  Keep track of the points the player got
 var messageLayer = new Kinetic.Layer();
 stage.add(messageLayer);
+var background = new Kinetic.Rect({
+        x: 0,
+        y: 0,
+        width:stage.getWidth(),
+        height:stage.getHeight(),stroke: 'black',
+        strokeWidth: 1
+});
+layer.add(background);
 
-var body = new Kinetic.Circle({
+var bodyObj = new Image();
+bodyObj.src = "pictures/plane.png";
+/* var body = new Kinetic.Circle({
 	x:stage.getWidth()/2,
 	y:stage.getHeight()/2,
 	radius:30,
 	stroke: 'black',
 	strokeWidth: 4
 });
-
+ */
+var body = new Kinetic.Image({
+	x:stage.getWidth()/2,
+	y:stage.getHeight()/2,
+	image: bodyObj,
+	width: 30,
+	height: 40,
+});
+ 
 layer.add(body);
 stage.add(layer);
-
-var background = new Kinetic.Rect({
-	x: 0,
-	y: 0,
-	width:stage.getWidth(),
-	height:stage.getHeight(),stroke: 'black',
-	strokeWidth: 1
-});
-layer.add(background);
-
-//--------------------------------------------
-var canvas
-var context2D;
-
-
-window.addEventListener("load", function(){
-	canvas = layer.getCanvas();
-	context2D = canvas.getContext("2d");
-	
-	var frameRate = 60.0;
-	var frameDelay = 1000.0/frameRate;
-	setInterval(function()
-	{	
-		update(frameDelay);
-	}, frameDelay);
-});
-
-//--------------------------------------------
 
 // Moving animation for body
 var animRight = new Kinetic.Animation(function(frame) {
@@ -75,7 +65,7 @@ var animDown = new Kinetic.Animation(function(frame) {
 	  body.setY(body.getY() + 5);
 	}
 }, layer);
-
+var i = 0;
 // Event for control the body
 window.addEventListener('keydown', function(e) {
 	switch (e.keyCode) {
@@ -96,16 +86,17 @@ window.addEventListener('keydown', function(e) {
 			animDown.start();
 			break;
 		case 32:
-			// Clear all the enemies
-			for (var i = 0; i < enemies.length; i++) {
-				enemies[i].remove();
-			}
-			for (var j = 0; j < enemiesAnim.length; j++) {
-				enemiesAnim[j].stop();
-			}
+			// var angle;
+			// for (angle = 0; angle <= 350; angle += 10) {
+				// setTimeout(alert("HEHE"), 3000);
+			// }
+			i = 0;
+			allDegree();
+			
 			break;
 	}
 });
+
 
 window.addEventListener('keyup', function(e) {
 	switch (e.keyCode) {
@@ -121,7 +112,6 @@ window.addEventListener('keyup', function(e) {
 		case 40:
 			animDown.stop();
 			break;
-			break;
 	}
 });
 
@@ -134,22 +124,35 @@ function writeMessage(messageLayer, message) {
 };
 // Create a bullet
 
-function createBullet(body, layer) {
+function createBullet(body, layer, angle) {
 	// The bullet body
-	var bullet = new Kinetic.Circle({
-		x:body.getX(),
+	var bx = 8 * Math.cos(angle * Math.PI / 180);
+	var by = 8 * Math.sin(angle * Math.PI / 180);
+	
+	var bulletObj = new Image();
+	bulletObj.src = "pictures/bullet.png";
+	var bullet = new Kinetic.Image({
+		x:body.getX() + 15,
 		y:body.getY(),
-		radius: 5,
-		fill: 'blue'
+		image: bulletObj,
+		width: 8,
+		height: 20,
+		rotationDeg: angle - 90
 	});
 	layer.add(bullet);
+	
+	
+	
+	// var bullet = new Kinetic.Circle({
+		// x:body.getX(),
+		// y:body.getY(),
+		// radius: 5,
+		// fill: 'blue'
+	// });
+	// layer.add(bullet);
 	var animBullet = new Kinetic.Animation(function(frame) {
-		bullet.setY( bullet.getY() - 10);
-		// Once reaches the bound, remove bullet
-		if (bullet.getY() <= 5) {
-			bullet.remove();
-			this.stop();
-		}
+		bullet.setX(bullet.getX() + bx);
+		bullet.setY( bullet.getY() + by);
 	});
 	animBullet.start();  // Start the animation
 	// Add the bullet and its animation to a list
@@ -161,7 +164,7 @@ function createBullet(body, layer) {
 
 window.setInterval(
 	function(){
-		createBullet(body, layer);
+		createBullet(body, layer, 270);
 	}
 , 250);
 
@@ -185,7 +188,7 @@ function enermy() {
 	enemies.push(enemy);  // Add the enemy to the enemies list
 	var enemyAnim = new Kinetic.Animation(function(frame) {
 		// Once reach bound, remove the enemy plane
-		if (enemy.getY() >= stage.getAttr("height") - 5){
+		if (enemy.getY() >= stage.getAttr("height") + 20){
 			enemies.splice(enemies.indexOf(enemy), 1);
 			enemy.remove();
 			this.stop();
@@ -218,10 +221,11 @@ function enermy() {
 				bullets.splice(i, 1);
 				points += 1;
 				writeMessage(messageLayer, points);
-
-				createExplosion(x1, y1, "#525252");
-				createExplosion(x1, y1, "#FFA318");
-			}
+			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				bullets[i][0].remove();
+				bullets[i][1].stop();
+				bullets.splice(i, 1);
+			} 
 		}
 		enemy.setY(enemy.getY() + 4);
 	}, layer);
@@ -229,122 +233,29 @@ function enermy() {
 	enemiesAnim.push(enemyAnim);
 };
 
-var particles = [];
-
-function randomFloat (min, max)
-{
-	return min + Math.random()*(max-min);
-}
-
-/*
- * A single explosion particle
- */
-function Particle ()
-{
-	this.scale = 1.0;
-	this.x = 0;
-	this.y = 0;
-	this.radius = 20;
-	this.color = "#000";
-	this.velocityX = 0;
-	this.velocityY = 0;
-	this.scaleSpeed = 0.5;
-	
-	this.update = function(ms)
-	{
-		// shrinking
-		this.scale -= this.scaleSpeed * ms / 1000.0;
-		
-		if (this.scale <= 0)
-		{
-			this.scale = 0;
-		}
-		
-		// moving away from explosion center
-		this.x += this.velocityX * ms/1000.0;
-		this.y += this.velocityY * ms/1000.0;
-	};
-	
-	this.draw = function(context2D)
-	{
-		// translating the 2D context to the particle coordinates
-		context2D.save();
-		context2D.translate(this.x, this.y);
-		context2D.scale(this.scale, this.scale);
-
-		// drawing a filled circle in the particle's local space
-		context2D.beginPath();
-		context2D.arc(0, 0, this.radius, 0, Math.PI*2, true);
-		context2D.closePath();
-		
-		context2D.fillStyle = this.color;
-		context2D.fill();
-		
-		context2D.restore();
-	};
-}
-
-/*
- * Basic Explosion, all particles move and shrink at the same speed.
- * 
- * Parameter : explosion center
- */
-
-/*
- * Advanced Explosion effect
- * Each particle has a different size, move speed and scale speed.
- * 
- * Parameters:
- * 	x, y - explosion center
- * 	color - particles' color
- */
-function createExplosion(x, y, color)
-{
-	var minSize = 10;
-	var maxSize = 30;
-	var count = 10;
-	var minSpeed = 60.0;
-	var maxSpeed = 200.0;
-	var minScaleSpeed = 1.0;
-	var maxScaleSpeed = 4.0;
-	
-	for (var angle=0; angle<360; angle += Math.round(360/count))
-	{
-		var particle = new Particle();
-		
-		particle.x = x;
-		particle.y = y;
-		
-		particle.radius = randomFloat(minSize, maxSize);
-		
-		particle.color = color;
-		
-		particle.scaleSpeed = randomFloat(minScaleSpeed, maxScaleSpeed);
-		
-		var speed = randomFloat(minSpeed, maxSpeed);
-		
-		particle.velocityX = speed * Math.cos(angle * Math.PI / 180.0);
-		particle.velocityY = speed * Math.sin(angle * Math.PI / 180.0);
-		
-		particles.push(particle);
+function allDegree() {
+	if (i < 36) {
+		window.setTimeout("allDegree()", 50);
+		createBullet(body, layer, i * 10);
+		i++;
 	}
-}
-
+};
 
 
 
 
 window.setInterval(function(){
 	enermy();
-}, 100);
+}, 200);
 // Effect for the explosion
 
 function update (frameDelay)
 {
 	// draw a white background to clear canvas
+	
 	context2D.fillStyle = "#FFF";
 	context2D.fillRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-	
+	alert("HEHEHE");
 	// update and draw particles
 	for (var i=0; i<particles.length; i++)
 	{
@@ -354,3 +265,4 @@ function update (frameDelay)
 		particle.draw(context2D);
 	}
 }
+
