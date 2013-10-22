@@ -21,20 +21,13 @@ layer.add(background);
 
 var bodyObj = new Image();
 bodyObj.src = "pictures/plane.png";
-/* var body = new Kinetic.Circle({
-	x:stage.getWidth()/2,
-	y:stage.getHeight()/2,
-	radius:30,
-	stroke: 'black',
-	strokeWidth: 4
-});
- */
 var body = new Kinetic.Image({
 	x:stage.getWidth()/2,
 	y:stage.getHeight()/2,
 	image: bodyObj,
-	width: 30,
-	height: 40,
+	width: 60,
+	height: 80,
+	offset: [30, 40]
 });
  
 layer.add(body);
@@ -132,12 +125,12 @@ function createBullet(body, layer, angle) {
 	var bulletObj = new Image();
 	bulletObj.src = "pictures/bullet.png";
 	var bullet = new Kinetic.Image({
-		x:body.getX() + 15,
-		y:body.getY(),
+		x:body.getX() - 5,
+		y:body.getY() - 40,
 		image: bulletObj,
-		width: 8,
-		height: 20,
-		rotationDeg: angle - 90
+		width: 12,
+		height: 25,
+		rotationDeg: angle + 90
 	});
 	layer.add(bullet);
 	
@@ -176,12 +169,17 @@ function enermy() {
 	py = 0;
 	
 	// Create an enemy variable with random position
-	var enemy = new Kinetic.Circle({
+	var enemyObj = new Image();
+	enemyObj.src = "pictures/enemy.png";
+	// Create an enemy variable with random position
+	var enemy = new Kinetic.Image({
 		x: px,
 		y: py,
-		radius: 5,
-		stroke: 'black',
-		strokeWidth: 5
+		image: enemyObj,
+		width: 20,
+		height: 30,
+		rotationDeg: 180,
+		offset: [10, 15]
 	});
 
 	layer.add(enemy); // Add the enemy variable to layer
@@ -211,7 +209,7 @@ function enermy() {
 			ddx =Math.pow((x1 - x2), 2);
 			ddy = Math.pow((y1 - y2), 2);
 			ddistance = Math.sqrt(ddx + ddy);
-			if (ddistance <= 20) {
+			if (ddistance <= 25) {
 				// Enemy hit by bullets, remove enemy and stop the animation
 				enemies.splice(enemies.indexOf(enemy), 1);
 				enemy.remove();

@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+</script>
+<script>
+</script>	
+  </head>
+  <body>
+  <p>Mouse is at coordinates: <span></span>.</p>
+    <div id="container"></div>
+    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
+    <script defer="defer">
+	$(document).ready(function(){
+		$(document).mousemove(function(event){
+			$("span").text(event.pageX + ", " + event.pageY);
+			if (event.pageX >= 358 && event.pageX <= 623 && event.pageY >= 422 && event.pageY <= 492) {
+				// About us page
+				aboutUs.moveToTop();
+				stage.draw();
+			}
+			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
+				// New game page
+				yoda.moveToTop();
+				stage.draw();
+			}
+			if (event.pageX >= 373 && event.pageX <= 606 && event.pageY >= 512 && event.pageY <= 579) {
+				// Option game page
+				option.moveToTop();
+				stage.draw();
+			}
+		});
+		$(document).click(function(event){
+			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
+				window.location.href = "battle.html";
+			}
+		});
+	});
+
+	var stage = new Kinetic.Stage({
+		container: 'container',
+		width: 960,
+		height: 600
+	});
+	var layer = new Kinetic.Layer();
+
+	var imageObj = new Image();
+	imageObj.src = "pictures/newgame.jpg";
+	var yoda = new Kinetic.Image({
+	  x: 0,
+	  y: 0,
+	  image: imageObj,
+	  width: 960,
+	  height: 600
+	});
+	// add the shape to the layer
+	layer.add(yoda);
+      
+	  
+	var aboutUsObj = new Image();
+	aboutUsObj.src = "pictures/aboutus.jpg";
+	var aboutUs = new Kinetic.Image({
+		x: 0,
+		y: 0,
+		image: aboutUsObj,
+		width: 960,
+		height: 600
+	});
+	layer.add(aboutUs);
+	
+	var optionObj = new Image();
+	optionObj.src = "pictures/options.jpg";
+	var option = new Kinetic.Image({
+		x: 0,
+		y: 0,
+		image: optionObj,
+		width: 960,
+		height: 600
+	});
+	layer.add(option);
+
+	
+	
+	stage.add(layer);
+	window.onload = function() {
+		stage.draw();
+	}
+
+    </script>
+  </body>
+</html>
