@@ -174,7 +174,11 @@ function enemyBullet(body, enemy, layer, angle) {
 		// Check collision with the player plane
 		var distance = getDistance(bullet.getX(), bullet.getY(), body.getX(), body.getY());
 		if (distance <= 30) {
-			// The player lose the game
+			// The player lose the game, remove the player plane and the bullet, stop animation
+			body.remove();
+			bullet.remove();
+			this.stop();
+			alert("You lose!!!!!!!");
 			window.location.href = "start-page.html";
 		}
 		// Check boundary, once hit the bound, remove the bullet and stop the animation
