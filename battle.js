@@ -134,15 +134,6 @@ function createBullet(body, layer, angle) {
 	});
 	layer.add(bullet);
 	
-	
-	
-	// var bullet = new Kinetic.Circle({
-		// x:body.getX(),
-		// y:body.getY(),
-		// radius: 5,
-		// fill: 'blue'
-	// });
-	// layer.add(bullet);
 	var animBullet = new Kinetic.Animation(function(frame) {
 		bullet.setX(bullet.getX() + bx);
 		bullet.setY( bullet.getY() + by);
@@ -155,6 +146,46 @@ function createBullet(body, layer, angle) {
 	bullets.push(bulletPair);
 };
 
+function enemyBullet(body, enemy, layer, angle) {
+	// Bullet from enemy
+	
+	// Get the shooting angle
+	var bx = 6 * Math.cos(angle * Math.PI / 180);
+	var by = 6 * Math.sin(angle * Math.PI / 180);
+	
+	// Create the bullet object
+	var bulletObj = new Image();
+	bulletObj.src = "pictures/bullet.png";
+	var bullet = new Kinetic.Image({
+		x:enemy.getX(),
+		y:enemy.getY(),
+		image: bulletObj,
+		width: 12,
+		height: 25,
+		rotationDeg: angle + 90
+	});
+	layer.add(bullet);
+	
+	
+	var animBullet = new Kinetic.Animation(function(frame) {
+		bullet.setX(bullet.getX() + bx);
+		bullet.setY( bullet.getY() + by);
+		
+		// Check collision with the player plane
+		var distance = getDistance(bullet.getX(), bullet.getY(), body.getX(), body.getY());
+		if (distance <= 30) {
+			// The player lose the game
+			window.location.href = "start-page.html";
+		}
+		// Check boundary, once hit the bound, remove the bullet and stop the animation
+		if (bullet.getY() <= 5 || bullet.getY() >= stage.getAttr("height") - 50 || bullet.getX() <= 50 || bullet.getX() >= stage.getAttr("width") - 50) {
+			bullet.remove();
+			this.stop();
+		}
+	});
+	animBullet.start();
+};
+
 window.setInterval(
 	function(){
 		createBullet(body, layer, 270);
@@ -165,8 +196,9 @@ function enermy() {
 	// Function for displaying enemy planes
 	
 	// Get a random position for the plane
-	px = Math.floor((Math.random()*800) + 1);
-	py = 0;
+	var px = Math.floor((Math.random()*1024) + 1);
+	var py = 0;
+	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
 	
 	// Create an enemy variable with random position
 	var enemyObj = new Image();
@@ -191,25 +223,28 @@ function enermy() {
 			enemy.remove();
 			this.stop();
 		}
+		
+		// Make the bomb based on the random position generated
+		if (enemy.getY() == bulletY) {
+			var angle;
+			for (angle = 0; angle <= 12; angle++) {
+				enemyBullet(body, enemy, layer, angle * 30);
+			}
+		}
 		// Define the collision logic here
-		dx = Math.pow((enemy.getX() - body.getX()), 2);
-		dy = Math.pow((enemy.getY() - body.getY()), 2);
-		distance = Math.sqrt(dx + dy);
+		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
 		if (distance <= 30) {
-			alert("You lose!!!!!!!");
-			location.reload();
+			body.remove();
+			enemy.remove();
+			this.stop();
+			alert("YOU LOSE!!!!");
+			window.location.href = "start-page.html";
 		}
 
 		for (var i = 0; i < bullets.length; i++) {
-			// Get coordinate and distance of bullets and enemies
-			x1 = enemy.getX();
-			y1 = enemy.getY();
-			x2 = bullets[i][0].getX();
-			y2 = bullets[i][0].getY();
-			ddx =Math.pow((x1 - x2), 2);
-			ddy = Math.pow((y1 - y2), 2);
-			ddistance = Math.sqrt(ddx + ddy);
-			if (ddistance <= 25) {
+			// Get coordinate and distance between bullets and this enemy
+			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
+			if (distance2 <= 25) {
 				// Enemy hit by bullets, remove enemy and stop the animation
 				enemies.splice(enemies.indexOf(enemy), 1);
 				enemy.remove();
@@ -220,6 +255,7 @@ function enermy() {
 				points += 1;
 				writeMessage(messageLayer, points);
 			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				// If the bullet hit the bound, remove the bullet and stop its animation
 				bullets[i][0].remove();
 				bullets[i][1].stop();
 				bullets.splice(i, 1);
@@ -231,6 +267,7 @@ function enermy() {
 	enemiesAnim.push(enemyAnim);
 };
 
+// Function for shooting the bullets in all 360 degrees
 function allDegree() {
 	if (i < 36) {
 		window.setTimeout("allDegree()", 50);
@@ -239,28 +276,16 @@ function allDegree() {
 	}
 };
 
-
-
-
 window.setInterval(function(){
 	enermy();
 }, 200);
 // Effect for the explosion
 
-function update (frameDelay)
-{
-	// draw a white background to clear canvas
-	
-	context2D.fillStyle = "#FFF";
-	context2D.fillRect(0, 0, context2D.canvas.width, context2D.canvas.height);
-	alert("HEHEHE");
-	// update and draw particles
-	for (var i=0; i<particles.length; i++)
-	{
-		var particle = particles[i];
-		
-		particle.update(frameDelay);
-		particle.draw(context2D);
-	}
-}
+function getDistance(x1, y1, x2, y2) {
+	// Get the distance between (x1, y1) and (x2, y2)
+	var dx =Math.pow((x1 - x2), 2);
+	var dy = Math.pow((y1 - y2), 2);
+	var distance = Math.sqrt(dx + dy);
+	return distance;
+};
 
