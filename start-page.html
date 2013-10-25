@@ -23,16 +23,19 @@
 			if (event.pageX >= 358 && event.pageX <= 623 && event.pageY >= 422 && event.pageY <= 492) {
 				// About us page
 				aboutUs.moveToTop();
+				topimage="aboutUs";
 				stage.draw();
 			}
 			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
 				// New game page
 				yoda.moveToTop();
+				topimage="yoda";
 				stage.draw();
 			}
 			if (event.pageX >= 373 && event.pageX <= 606 && event.pageY >= 512 && event.pageY <= 579) {
 				// Option game page
 				option.moveToTop();
+				topimage="option";
 				stage.draw();
 			}
 		});
@@ -41,8 +44,46 @@
 				window.location.href = "battle.html";
 			}
 		});
+		
 	});
 
+		var topimage = "option";	// Variable that indicates the page on the top.
+		window.addEventListener('keyup', function(e) {
+			switch (e.keyCode) {
+				case 38:{
+					if(topimage=="aboutUs"){
+						yoda.moveToTop();				
+						topimage="yoda";
+						stage.draw();
+					}		
+					else if(topimage=="option"){				
+						aboutUs.moveToTop();
+						topimage="aboutUs";
+						stage.draw();
+					}					
+					break;						
+				}
+				case 40:{
+					if(topimage=="aboutUs"){
+						option.moveToTop();
+						topimage="option";
+						stage.draw();
+					}		
+					else if(topimage=="yoda"){ 
+						aboutUs.moveToTop();
+						topimage="aboutUs"; 
+						stage.draw(); 
+					}
+					break;			
+				}
+				case 13:{
+					if(topimage=="yoda")
+						window.location.href = "battle.html";
+				}
+			}						
+		});
+
+		
 	var stage = new Kinetic.Stage({
 		container: 'container',
 		width: 960,
@@ -74,6 +115,7 @@
 	});
 	layer.add(aboutUs);
 	
+	
 	var optionObj = new Image();
 	optionObj.src = "pictures/options.jpg";
 	var option = new Kinetic.Image({
@@ -92,7 +134,9 @@
 	window.onload = function() {
 		stage.draw();
 	}
+	
 
     </script>
+	
   </body>
 </html>
