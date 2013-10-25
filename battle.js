@@ -79,13 +79,8 @@ window.addEventListener('keydown', function(e) {
 			animDown.start();
 			break;
 		case 32:
-			// var angle;
-			// for (angle = 0; angle <= 350; angle += 10) {
-				// setTimeout(alert("HEHE"), 3000);
-			// }
 			i = 0;
 			allDegree();
-			
 			break;
 	}
 });
@@ -148,7 +143,6 @@ function createBullet(body, layer, angle) {
 
 function enemyBullet(body, enemy, layer, angle) {
 	// Bullet from enemy
-	
 	// Get the shooting angle
 	var bx = 6 * Math.cos(angle * Math.PI / 180);
 	var by = 6 * Math.sin(angle * Math.PI / 180);
@@ -231,8 +225,8 @@ function enermy() {
 		// Make the bomb based on the random position generated
 		if (enemy.getY() == bulletY) {
 			var angle;
-			for (angle = 0; angle <= 12; angle++) {
-				enemyBullet(body, enemy, layer, angle * 30);
+			for (angle = 0; angle <= 6; angle++) {
+				enemyBullet(body, enemy, layer, angle * 60);
 			}
 		}
 		// Define the collision logic here
@@ -274,8 +268,8 @@ function enermy() {
 // Function for shooting the bullets in all 360 degrees
 function allDegree() {
 	if (i < 36) {
-		window.setTimeout("allDegree()", 50);
-		createBullet(body, layer, i * 10);
+		window.setTimeout("allDegree()", 10);
+		createBullet(body, layer, i * 20);
 		i++;
 	}
 };
