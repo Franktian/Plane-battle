@@ -20,14 +20,14 @@ var background = new Kinetic.Rect({
 layer.add(background);
 
 var bodyObj = new Image();
-bodyObj.src = "pictures/plane.png";
+bodyObj.src = "pictures/ourplane.png";
 var body = new Kinetic.Image({
 	x:stage.getWidth()/2,
 	y:stage.getHeight()/2,
 	image: bodyObj,
-	width: 60,
-	height: 80,
-	offset: [30, 40]
+	width: 80,
+	height: 110,
+	offset: [40, 55]
 });
  
 layer.add(body);
@@ -149,7 +149,7 @@ function enemyBullet(body, enemy, layer, angle) {
 	
 	// Create the bullet object
 	var bulletObj = new Image();
-	bulletObj.src = "pictures/bullet.png";
+	bulletObj.src = "pictures/bullet2.png";
 	var bullet = new Kinetic.Image({
 		x:enemy.getX(),
 		y:enemy.getY(),
@@ -159,8 +159,7 @@ function enemyBullet(body, enemy, layer, angle) {
 		rotationDeg: angle + 90
 	});
 	layer.add(bullet);
-	
-	
+
 	var animBullet = new Kinetic.Animation(function(frame) {
 		bullet.setX(bullet.getX() + bx);
 		bullet.setY( bullet.getY() + by);
@@ -206,10 +205,10 @@ function enermy() {
 		x: px,
 		y: py,
 		image: enemyObj,
-		width: 20,
-		height: 30,
+		width: 40,
+		height: 60,
 		rotationDeg: 180,
-		offset: [10, 15]
+		offset: [20, 30]
 	});
 
 	layer.add(enemy); // Add the enemy variable to layer
@@ -231,7 +230,7 @@ function enermy() {
 		}
 		// Define the collision logic here
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 30) {
+		if (distance <= 50) {
 			body.remove();
 			enemy.remove();
 			this.stop();
@@ -242,8 +241,9 @@ function enermy() {
 		for (var i = 0; i < bullets.length; i++) {
 			// Get coordinate and distance between bullets and this enemy
 			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
-			if (distance2 <= 25) {
+			if (distance2 <= 30) {
 				// Enemy hit by bullets, remove enemy and stop the animation
+				explosion(enemy.getX(), enemy.getY(), layer);
 				enemies.splice(enemies.indexOf(enemy), 1);
 				enemy.remove();
 				this.stop();
@@ -285,5 +285,152 @@ function getDistance(x1, y1, x2, y2) {
 	var dy = Math.pow((y1 - y2), 2);
 	var distance = Math.sqrt(dx + dy);
 	return distance;
+};
+
+function explosion(x, y, layer) {
+	// Animations for the explosion sprite
+	var animations = {
+		walkCycle: [{
+			x: 0,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 256,
+			width: 64,
+			height: 64
+		}]
+	};
+	var explosionObj = new Image();
+	explosionObj.src = "pictures/explosion.png";
+	var blob = new Kinetic.Sprite({
+		x: x - 20,
+		y: y - 20,
+		image: explosionObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 40,
+	});
+	layer.add(blob);
+	blob.start();
+	blob.afterFrame(24, function(){
+		blob.remove();
+	});
 };
 
