@@ -32,6 +32,8 @@
 	</div>
     <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
     <script defer="defer">
+	var buttonSound = new Audio('audios/button.mp3');
+	var clickSound = new Audio('audios/click.mp3');
 	$(document).ready(function(){
 		$('#container').mousemove(function(event){
 			$("span").text(event.pageX + ", " + event.pageY);
@@ -90,8 +92,37 @@
 		height: 600
 	});
 	layer.add(back);
+
+	var mouseLayer = new Kinetic.Layer();
+	var backRect = new Kinetic.Rect({
+		x: 40,
+		y: 460,
+		width: 330,
+		height: 70,
+	});
+	backRect.on('mouseover', function() {
+		buttonSound.play();
+	});
+	backRect.on('mousedown', function() {
+		clickSound.play();
+	});
+	mouseLayer.add(backRect);
 	
+	var againRect = new Kinetic.Rect({
+		x: 630,
+		y: 460,
+		width: 275,
+		height: 70
+	});
+	againRect.on('mouseover', function() {
+		buttonSound.play();
+	});
+	againRect.on('mousedown', function() {
+		clickSound.play();
+	});
+	mouseLayer.add(againRect);
 	stage.add(layer);
+	stage.add(mouseLayer);
 	// When loaded the page, draw the stage immediately
 	window.onload = function() {
 		stage.draw();

@@ -8,6 +8,8 @@ var bullets = [];  // Keep track of the bullets
 var enemies = [];  // Keep track of the enemies
 var enemiesAnim = []; // Keep track of the enemy animations
 var points = 0;  //  Keep track of the points the player got
+var explosionSound = new Audio('audios/explosion1.mp3');
+var deadSound = new Audio('audios/explosion2.mp3');
 var messageLayer = new Kinetic.Layer();
 stage.add(messageLayer);
 
@@ -191,7 +193,7 @@ function enemyBullet(body, enemy, layer, angle) {
 	animBullet.start();
 };
 
-window.setInterval(
+var bulletId = setInterval(
 	function(){
 		createBullet(body, layer, 270);
 	}
@@ -239,11 +241,11 @@ function enermy() {
 		// Define the collision logic here
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
 		if (distance <= 50) {
+			
 			body.remove();
 			enemy.remove();
 			this.stop();
-			//alert("YOU LOSE!!!!");
-			//window.location.href = "start-page.html";
+			explosion(enemy.getX(), enemy.getY(), layer);
 			dead(body.getX(), body.getY(), layer);
 		}
 
@@ -252,8 +254,8 @@ function enermy() {
 			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
 			if (distance2 <= 30) {
 				// Enemy hit by bullets, remove enemy and stop the animation
-				var explosionSound = new Audio('audios/explosion1.mp3');
-				explosionSound.play();
+				
+				
 				explosion(enemy.getX(), enemy.getY(), layer);
 				enemies.splice(enemies.indexOf(enemy), 1);
 				enemy.remove();
@@ -285,7 +287,7 @@ function allDegree() {
 	}
 };
 
-window.setInterval(function(){
+var enemyID = window.setInterval(function(){
 	enermy();
 }, 200);
 // Effect for the explosion
@@ -300,6 +302,7 @@ function getDistance(x1, y1, x2, y2) {
 
 function explosion(x, y, layer) {
 	// Animations for the explosion sprite
+	explosionSound.play();
 	var animations = {
 		walkCycle: [{
 			x: 0,
@@ -447,6 +450,8 @@ function explosion(x, y, layer) {
 
 // Animation to display when the player's battle is crashed
 function dead(x, y, layer) {
+	deadSound.play();
+	clearInterval(bulletId);
 	var animations = {
 		walkCycle: [{
 			x: 0,
@@ -707,8 +712,8 @@ function dead(x, y, layer) {
 	});
 	layer.add(blob);
 	blob.start();
-	var deadSound = new Audio('audios/explosion2.mp3');
-	deadSound.play();
+	
+	
 	blob.afterFrame(35, function(){
 		blob.remove();
 		window.location.href = "end-page.html";
