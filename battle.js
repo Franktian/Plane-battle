@@ -26,8 +26,8 @@ var body = new Kinetic.Image({
 	y:stage.getHeight()/2,
 	image: bodyObj,
 	width: 80,
-	height: 110,
-	offset: [40, 55]
+	height: 100,
+	offset: [40, 50]
 });
  
 layer.add(body);
@@ -171,8 +171,8 @@ function enemyBullet(body, enemy, layer, angle) {
 			body.remove();
 			bullet.remove();
 			this.stop();
-			alert("You lose!!!!!!!");
-			window.location.href = "start-page.html";
+			dead(body.getX(), body.getY(), layer);
+
 		}
 		// Check boundary, once hit the bound, remove the bullet and stop the animation
 		if (bullet.getY() <= 5 || bullet.getY() >= stage.getAttr("height") - 50 || bullet.getX() <= 50 || bullet.getX() >= stage.getAttr("width") - 50) {
@@ -199,16 +199,16 @@ function enermy() {
 	
 	// Create an enemy variable with random position
 	var enemyObj = new Image();
-	enemyObj.src = "pictures/enemy.png";
+	enemyObj.src = "pictures/enemy1.png";
 	// Create an enemy variable with random position
 	var enemy = new Kinetic.Image({
 		x: px,
 		y: py,
 		image: enemyObj,
-		width: 40,
-		height: 60,
+		width: 30,
+		height: 40,
 		rotationDeg: 180,
-		offset: [20, 30]
+		offset: [15, 20]
 	});
 
 	layer.add(enemy); // Add the enemy variable to layer
@@ -234,8 +234,9 @@ function enermy() {
 			body.remove();
 			enemy.remove();
 			this.stop();
-			alert("YOU LOSE!!!!");
-			window.location.href = "start-page.html";
+			//alert("YOU LOSE!!!!");
+			//window.location.href = "start-page.html";
+			dead(body.getX(), body.getY(), layer);
 		}
 
 		for (var i = 0; i < bullets.length; i++) {
@@ -431,6 +432,274 @@ function explosion(x, y, layer) {
 	blob.start();
 	blob.afterFrame(24, function(){
 		blob.remove();
+	});
+};
+
+// Animation to display when the player's battle is crashed
+function dead(x, y, layer) {
+	var animations = {
+		walkCycle: [{
+			x: 0,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 256,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 512,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 768,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 1024,
+			y: 0,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 128,
+			width: 128,
+			height: 128
+		},  {
+			x: 256,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 640,
+			width: 128,
+			height: 128
+		}]
+	};
+	var explosionObj = new Image();
+	explosionObj.src = "pictures/explosion3.png";
+	var blob = new Kinetic.Sprite({
+		x: x - 40,
+		y: y - 50,
+		image: explosionObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 25,
+	});
+	layer.add(blob);
+	blob.start();
+	blob.afterFrame(35, function(){
+		blob.remove();
+		window.location.href = "end-page.html";
 	});
 };
 
