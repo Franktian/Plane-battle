@@ -10,12 +10,17 @@ var enemiesAnim = []; // Keep track of the enemy animations
 var points = 0;  //  Keep track of the points the player got
 var messageLayer = new Kinetic.Layer();
 stage.add(messageLayer);
-var background = new Kinetic.Rect({
+
+// Add a background image
+
+var backgroundObj = new Image();
+backgroundObj.src = "pictures/background1.jpg";
+var background = new Kinetic.Image({
         x: 0,
         y: 0,
+		image: backgroundObj,
         width:stage.getWidth(),
-        height:stage.getHeight(),stroke: 'black',
-        strokeWidth: 1
+        height:stage.getHeight()
 });
 layer.add(background);
 
@@ -32,6 +37,7 @@ var body = new Kinetic.Image({
  
 layer.add(body);
 stage.add(layer);
+stage.draw();
 
 // Moving animation for body
 var animRight = new Kinetic.Animation(function(frame) {
@@ -114,6 +120,8 @@ function writeMessage(messageLayer, message) {
 
 function createBullet(body, layer, angle) {
 	// The bullet body
+	var shotSound = new Audio('audios/gunshot.mp3');
+	shotSound.play();
 	var bx = 8 * Math.cos(angle * Math.PI / 180);
 	var by = 8 * Math.sin(angle * Math.PI / 180);
 	
@@ -244,6 +252,8 @@ function enermy() {
 			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
 			if (distance2 <= 30) {
 				// Enemy hit by bullets, remove enemy and stop the animation
+				var explosionSound = new Audio('audios/explosion1.mp3');
+				explosionSound.play();
 				explosion(enemy.getX(), enemy.getY(), layer);
 				enemies.splice(enemies.indexOf(enemy), 1);
 				enemy.remove();
@@ -697,6 +707,8 @@ function dead(x, y, layer) {
 	});
 	layer.add(blob);
 	blob.start();
+	var deadSound = new Audio('audios/explosion2.mp3');
+	deadSound.play();
 	blob.afterFrame(35, function(){
 		blob.remove();
 		window.location.href = "end-page.html";

@@ -31,6 +31,8 @@
 	</div>
     <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
     <script defer="defer">
+	var buttonSound = new Audio('audios/button.mp3');
+	var clickSound = new Audio('audios/click.mp3');
 	$(document).ready(function(){
 		$('#container').mousemove(function(event){
 			$("span").text(event.pageX + ", " + event.pageY + "New.zindex is " + yoda.getZIndex());
@@ -48,6 +50,7 @@
 			}
 			if (event.pageX >= 373 && event.pageX <= 606 && event.pageY >= 512 && event.pageY <= 579) {
 				// Option game page
+				
 				option.moveToTop();
 				topimage="option";
 				stage.draw();
@@ -64,12 +67,13 @@
 	window.addEventListener('keyup', function(e) {
 		switch (e.keyCode) {
 			case 38:{
+				buttonSound.play();
 				if(topimage=="aboutUs"){
 					yoda.moveToTop();				
 					topimage="yoda";
 					stage.draw();
 				}		
-				else if(topimage=="option"){				
+				else if(topimage=="option"){
 					aboutUs.moveToTop();
 					topimage="aboutUs";
 					stage.draw();
@@ -82,12 +86,14 @@
 				break;						
 			}
 			case 40:{
+				buttonSound.play();
 				if(topimage=="aboutUs"){
 					option.moveToTop();
 					topimage="option";
 					stage.draw();
 				}		
 				else if(topimage=="yoda"){ 
+					buttonSound.play();
 					aboutUs.moveToTop();
 					topimage="aboutUs"; 
 					stage.draw(); 
@@ -151,11 +157,52 @@
 	});
 	// add the shape to the layer
 	layer.add(yoda);
+	var mouseLayer = new Kinetic.Layer();
+	stage.add(mouseLayer);
+	
+	// Variables to play sound
+	var newGame = new Kinetic.Rect({
+		x: 335,
+		y: 275,
+		width: 308,
+		height: 70,
+	});
+	newGame.on('mouseover', function() {
+		buttonSound.play();
+    });
+	newGame.on('mousedown', function() {
+		clickSound.play();
+	});
+	mouseLayer.add(newGame);
+	
+	var us = new Kinetic.Rect({
+		x: 360,
+		y: 372,
+		width: 250,
+		height: 70,
+	});
+	us.on('mouseover', function() {
+		buttonSound.play();
+	});
+	mouseLayer.add(us);
+	
+	var op = new Kinetic.Rect({
+		x: 370,
+		y: 460,
+		width: 230,
+		height: 70,
+	});
+	op.on('mouseover', function() {
+		buttonSound.play();
+	});
+	mouseLayer.add(op);
 	stage.add(layer);
+	stage.add(mouseLayer);
+	
 	// When loaded the page, draw the stage immediately
 	window.onload = function() {
 		stage.draw();
-	}
+	};
 
     </script>
 	
