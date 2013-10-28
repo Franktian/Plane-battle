@@ -70,16 +70,7 @@
 
       
 	  
-	var playagainObj = new Image();
-	playagainObj.src = "pictures/playagain.jpg";
-	var again = new Kinetic.Image({
-		x: 0,
-		y: 0,
-		image: playagainObj,
-		width: 960,
-		height: 600
-	});
-	layer.add(again);
+	
 	
 	
 	var backObj = new Image();
@@ -92,6 +83,17 @@
 		height: 600
 	});
 	layer.add(back);
+	
+	var playagainObj = new Image();
+	playagainObj.src = "pictures/playagain.jpg";
+	var again = new Kinetic.Image({
+		x: 0,
+		y: 0,
+		image: playagainObj,
+		width: 960,
+		height: 600
+	});
+	layer.add(again);
 
 	var mouseLayer = new Kinetic.Layer();
 	var backRect = new Kinetic.Rect({

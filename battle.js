@@ -8,21 +8,22 @@ var bullets = [];  // Keep track of the bullets
 var enemies = [];  // Keep track of the enemies
 var enemiesAnim = []; // Keep track of the enemy animations
 var points = 0;  //  Keep track of the points the player got
-var explosionSound = new Audio('audios/explosion1.mp3');
 var deadSound = new Audio('audios/explosion2.mp3');
 var messageLayer = new Kinetic.Layer();
-stage.add(messageLayer);
+
+
 
 // Add a background image
 
 var backgroundObj = new Image();
 backgroundObj.src = "pictures/background1.jpg";
 var background = new Kinetic.Image({
-        x: 0,
-        y: 0,
-		image: backgroundObj,
-        width:stage.getWidth(),
-        height:stage.getHeight()
+	x: 0,
+	y: 0,
+	image: backgroundObj,
+	width:stage.getWidth(),
+	height:stage.getHeight(),
+	opacity: 1	
 });
 layer.add(background);
 
@@ -39,7 +40,7 @@ var body = new Kinetic.Image({
  
 layer.add(body);
 stage.add(layer);
-stage.draw();
+stage.add(messageLayer);
 
 // Moving animation for body
 var animRight = new Kinetic.Animation(function(frame) {
@@ -112,11 +113,12 @@ window.addEventListener('keyup', function(e) {
 });
 
 function writeMessage(messageLayer, message) {
+		messageLayer.moveToTop();
 		var context = messageLayer.getContext();
 		messageLayer.clear();
-		context.font = '18pt Calibri';
-		context.fillStyle = 'black';
-		context.fillText(message, 50, 25);  // The position to be displayed on the stage
+		context.font = '10pt Calibri';
+		context.fillStyle = 'yellow';
+		context.fillText(message, 500, 25);  // The position to be displayed on the stage
 };
 // Create a bullet
 
@@ -234,7 +236,7 @@ function enermy() {
 		// Make the bomb based on the random position generated
 		if (enemy.getY() == bulletY) {
 			var angle;
-			for (angle = 0; angle <= 6; angle++) {
+			for (angle = 0; angle <= 5; angle++) {
 				enemyBullet(body, enemy, layer, angle * 60);
 			}
 		}
@@ -278,6 +280,7 @@ function enermy() {
 	enemiesAnim.push(enemyAnim);
 };
 
+
 // Function for shooting the bullets in all 360 degrees
 function allDegree() {
 	if (i < 36) {
@@ -302,6 +305,7 @@ function getDistance(x1, y1, x2, y2) {
 
 function explosion(x, y, layer) {
 	// Animations for the explosion sprite
+	var explosionSound = new Audio('audios/explosion1.mp3');
 	explosionSound.play();
 	var animations = {
 		walkCycle: [{
