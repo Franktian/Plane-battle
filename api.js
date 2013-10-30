@@ -1,147 +1,33 @@
-var stage = new Kinetic.Stage({
-	container: 'container',
-	width: 1024,
-	height: 600
-});
-var layer = new Kinetic.Layer();  // Layer to display what's happening
-var bullets = [];  // Keep track of the bullets
-var enemies = [];  // Keep track of the enemies
-var enemiesAnim = []; // Keep track of the enemy animations
-var points = 0;  //  Keep track of the points the player got
-var protectPlayer = false;
-var deadSound = new Audio('audios/explosion2.mp3');
-var messageLayer = new Kinetic.Layer();
-
-
-
-// Add a background image
-
-var backgroundObj = new Image();
-backgroundObj.src = "pictures/background1.jpg";
-var background = new Kinetic.Image({
-	x: 0,
-	y: 0,
-	image: backgroundObj,
-	width:stage.getWidth(),
-	height:stage.getHeight(),
-	opacity: 1
-});
-layer.add(background);
-
-var bodyObj = new Image();
-bodyObj.src = "pictures/ourplane.png";
-var body = new Kinetic.Image({
-	x:stage.getWidth()/2,
-	y:stage.getHeight()/2,
-	image: bodyObj,
-	width: 80,
-	height: 100,
-	offset: [40, 50]
-});
- 
-layer.add(body);
-stage.add(layer);
-stage.add(messageLayer);
-
-// Moving animation for body
-var animRight = new Kinetic.Animation(function(frame) {
-	if (body.getX() <= stage.getAttr("width") - 80) {
-		body.setX(body.getX() + 5);
-	}  
-}, layer);
-
-var animUp = new Kinetic.Animation(function(frame) {
-	if (body.getY() >= 10) {
-		body.setY(body.getY() - 5);
-	}
-}, layer);
-
-var animLeft = new Kinetic.Animation(function(frame) {
-	if (body.getX() >= 10) {
-		body.setX(body.getX() - 5);
-	}
-
-}, layer);
-
-var animDown = new Kinetic.Animation(function(frame) {
-	if (body.getY() <= stage.getAttr("height") - 55) {
-	  body.setY(body.getY() + 5);
-	}
-}, layer);
-var i = 0;
-// Event for control the body
-window.addEventListener('keydown', function(e) {
-	switch (e.keyCode) {
-		case 37:
-			// Left
-			animLeft.start();
-			break;
-		case 38:
-			// Up
-			animUp.start();
-			break;
-		case 39:
-			// Right
-			animRight.start();
-			break;
-		case 40:
-			// Down
-			animDown.start();
-			break;
-		case 32:
-			i = 0;
-			allDegree();
-			break;
-	}
-});
-
-
-window.addEventListener('keyup', function(e) {
-	switch (e.keyCode) {
-		case 37:
-			animLeft.stop();
-			break;
-		case 38:
-			animUp.stop();
-			break;
-		case 39:
-			animRight.stop();
-			break;
-		case 40:
-			animDown.stop();
-			break;
-	}
-});
-
+// Display messages on the stage
 function writeMessage(messageLayer, message) {
-		messageLayer.moveToTop();
-		var context = messageLayer.getContext();
-		messageLayer.clear();
-		context.font = '10pt Calibri';
-		context.fillStyle = 'yellow';
-		context.fillText(message, 500, 25);  // The position to be displayed on the stage
+	/**
+	 * messageLayer: the layer to print the message on
+	 * message: The message to be printed
+	 */
+	messageLayer.moveToTop();
+	var context = messageLayer.getContext();
+	messageLayer.clear();
+	context.font = '10pt Calibri';
+	context.fillStyle = 'yellow';
+	context.fillText(message, 500, 25);  // The position to be displayed on the stage
 };
-// Create a bullet
 
-function createBullet(body, layer, angle) {
-	// The bullet body
+function createBullet(body, layer, angle, bullets) {
+	/** 
+	 * Create the bullet at the head of the player plane, specifically body
+	 * layer: bullet to be added to this layer
+	 * angle: shooting angle when the bullet is created
+	 * bullets: a list to track all the bullets
+	 */ 
 	var shotSound = new Audio('audios/gunshot.mp3');
 	shotSound.play();
 	var bx = 8 * Math.cos(angle * Math.PI / 180);
 	var by = 8 * Math.sin(angle * Math.PI / 180);
 	
-	var bulletObj = new Image();
-	bulletObj.src = "pictures/bullet.png";
-	var bullet = new Kinetic.Image({
-		x:body.getX() - 5,
-		y:body.getY() - 40,
-		image: bulletObj,
-		width: 12,
-		height: 25,
-		rotationDeg: angle + 90
-	});
-	layer.add(bullet);
+	// Load the bullet image
+	var bullet = loadImage(body.getX() - 5, body.getY() - 40, 12, 25, layer, "pictures/bullet.png", 1, [0, 0], angle + 90);
 	
+	// Create the bullet animation
 	var animBullet = new Kinetic.Animation(function(frame) {
 		bullet.setX(bullet.getX() + bx);
 		bullet.setY( bullet.getY() + by);
@@ -155,23 +41,20 @@ function createBullet(body, layer, angle) {
 };
 
 function enemyBullet(body, enemy, layer, angle) {
+	/**
+	 * Function for the enemy plane to shoot bullets
+	 * body: track the coordinate of the player
+	 * enemy: The bullet is created at the center of this enemy
+	 * layer: the bullet is to be added to this layer
+	 * angle: The angle to be shooted
+	 */
 	// Bullet from enemy
 	// Get the shooting angle
 	var bx = 6 * Math.cos(angle * Math.PI / 180);
 	var by = 6 * Math.sin(angle * Math.PI / 180);
 	
-	// Create the bullet object
-	var bulletObj = new Image();
-	bulletObj.src = "pictures/bullet2.png";
-	var bullet = new Kinetic.Image({
-		x:enemy.getX(),
-		y:enemy.getY(),
-		image: bulletObj,
-		width: 12,
-		height: 25,
-		rotationDeg: angle + 90
-	});
-	layer.add(bullet);
+	// Create the bullet object	
+	var bullet = loadImage(enemy.getX(), enemy.getY(), 12, 25, layer, "pictures/bullet2.png", 1, [0, 0], angle + 90);
 
 	var animBullet = new Kinetic.Animation(function(frame) {
 		bullet.setX(bullet.getX() + bx);
@@ -196,128 +79,37 @@ function enemyBullet(body, enemy, layer, angle) {
 	animBullet.start();
 };
 
-var bulletId = setInterval(
-	function(){
-		createBullet(body, layer, 270);
-	}
-, 250);
-protection(layer);  // Protect the player
-function enermy() {
-	// Function for displaying enemy planes
-	
-	// Get a random position for the plane
-	var px = Math.floor((Math.random()*1024) + 1);
-	var py = 0;
-	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
-	
-	// Create an enemy variable with random position
-	var enemyObj = new Image();
-	enemyObj.src = "pictures/enemy1.png";
-	// Create an enemy variable with random position
-	var enemy = new Kinetic.Image({
-		x: px,
-		y: py,
-		image: enemyObj,
-		width: 30,
-		height: 40,
-		rotationDeg: 180,
-		offset: [15, 20]
-	});
 
-	layer.add(enemy); // Add the enemy variable to layer
-	enemies.push(enemy);  // Add the enemy to the enemies list
-	var enemyAnim = new Kinetic.Animation(function(frame) {
-		// Once reach bound, remove the enemy plane
-		if (enemy.getY() >= stage.getAttr("height") + 20){
-			enemies.splice(enemies.indexOf(enemy), 1);
-			enemy.remove();
-			this.stop();
-		}
-		
-		// Make the bomb based on the random position generated
-		if (enemy.getY() == bulletY) {
-			var angle;
-			for (angle = 0; angle <= 5; angle++) {
-				enemyBullet(body, enemy, layer, angle * 60);
-			}
-		}
-		// Define the collision logic here
-		
-		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (protectPlayer != true) {
-			if (distance <= 50) {
-				// The player is dead
-				body.remove();
-				enemy.remove();
-				this.stop();
-				explosion(enemy.getX(), enemy.getY(), layer);
-				dead(body.getX(), body.getY(), layer);
-			}
-		} else {
-			// The player is currently under protection
-			if (distance <= 100) {
-				enemy.remove();
-				this.stop();
-				explosion(enemy.getX(), enemy.getY(), layer);
-			}
-		}
-
-		for (var i = 0; i < bullets.length; i++) {
-			// Get coordinate and distance between bullets and this enemy
-			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
-			if (distance2 <= 30) {
-				// Enemy hit by bullets, remove enemy and stop the animation
-				
-				
-				explosion(enemy.getX(), enemy.getY(), layer);
-				enemies.splice(enemies.indexOf(enemy), 1);
-				enemy.remove();
-				this.stop();
-				bullets[i][0].remove();
-				bullets[i][1].stop();
-				bullets.splice(i, 1);
-				points += 1;
-				writeMessage(messageLayer, points);
-			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
-				// If the bullet hit the bound, remove the bullet and stop its animation
-				bullets[i][0].remove();
-				bullets[i][1].stop();
-				bullets.splice(i, 1);
-			} 
-		}
-		enemy.setY(enemy.getY() + 4);
-	}, layer);
-	enemyAnim.start();
-	enemiesAnim.push(enemyAnim);
-};
-
-
-// Function for shooting the bullets in all 360 degrees
 function allDegree() {
 	if (i < 36) {
 		window.setTimeout("allDegree()", 10);
-		createBullet(body, layer, i * 20);
+		createBullet(body, layer, i * 20, bullets);
 		i++;
 	}
 };
 
-var enemyID = window.setInterval(function(){
-	enermy();
-}, 200);
-// Effect for the explosion
-
 function getDistance(x1, y1, x2, y2) {
-	// Get the distance between (x1, y1) and (x2, y2)
+	/** 
+	 * Get the distance between (x1, y1) and (x2, y2)
+	 */
 	var dx =Math.pow((x1 - x2), 2);
 	var dy = Math.pow((y1 - y2), 2);
 	var distance = Math.sqrt(dx + dy);
 	return distance;
 };
 
+
 function explosion(x, y, layer) {
-	// Animations for the explosion sprite
+	/**
+	 * Create an explosion at position (x, y)
+	 * Animate this explosion at this layer
+	 */
+	 
+	 // Play the explosion sound effect
 	var explosionSound = new Audio('audios/explosion1.mp3');
 	explosionSound.play();
+	
+	// Get the animation picture coordinates
 	var animations = {
 		walkCycle: [{
 			x: 0,
@@ -446,8 +238,10 @@ function explosion(x, y, layer) {
 			height: 64
 		}]
 	};
+	
+	// Create the explosion animation objects
 	var explosionObj = new Image();
-	explosionObj.src = "pictures/explosion.png";
+	explosionObj.src = "pictures/explosion.png";  // Get the url
 	var blob = new Kinetic.Sprite({
 		x: x - 20,
 		y: y - 20,
@@ -458,13 +252,20 @@ function explosion(x, y, layer) {
 	});
 	layer.add(blob);
 	blob.start();
+	
+	// After the whole explosion cycle has finished, remove the explosion object
 	blob.afterFrame(24, function(){
 		blob.remove();
 	});
 };
 
-// Animation to display when the player's battle is crashed
 function dead(x, y, layer) {
+	/**
+	 * Create the dead effect when player plane is dead
+	 * At position (x, y)
+	 * Displayed at the provided layer
+	 */
+	var deadSound = new Audio('audios/explosion2.mp3');
 	deadSound.play();
 	clearInterval(bulletId);
 	var animations = {
@@ -728,15 +529,18 @@ function dead(x, y, layer) {
 	layer.add(blob);
 	blob.start();
 	
-	
+	// Remove the explosion effect after a full cycle
 	blob.afterFrame(35, function(){
 		blob.remove();
 		window.location.href = "end-page.html";
 	});
 };
 
-// Create a temporary  protection for the player
+
 function protection(layer) {
+	/**
+	 * Create a temporary protection area
+	 */
 	var circle = new Kinetic.Circle({
 		x: body.getX(),
 		y: body.getY(),
@@ -745,6 +549,98 @@ function protection(layer) {
 		opacity: 0.5
 	});
 	layer.add(circle);
-	
 	protectPlayer = true;
-}
+};
+
+function loadImage(x, y, width, height, layer, url, opacity, offset, rotation) {
+	/**
+	 * Load an image with the provided url
+	 * At position (x, y)
+	 * With width and height
+	 * With Transparency opacity
+	 * On the provided layer
+	 */
+	var imageObj = new Image();
+	imageObj.src = url;
+	var image = new Kinetic.Image({
+		x: x,
+		y: y,
+		image: imageObj,
+		width: width,
+		height: height,
+		opacity: opacity,
+		offset: offset,
+		rotationDeg: rotation
+	});
+	layer.add(image);
+	return image;
+};
+
+
+function remove(list, object, animation, i) {
+	/**
+	 * Remove the object from the list and stop its attached animation
+	 */
+	 list.splice(i, 1);
+	 object.remove();
+	 animation.stop();
+};
+
+
+function enermy(layer, enemies, bullets, body) {
+	// Function for displaying enemy planes
+
+	// Get a random position for the plane
+	var px = Math.floor((Math.random()*1024) + 1);
+	var py = 0;
+	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
+	
+	// Create an enemy variable with random position
+	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
+	enemies.push(enemy);  // Add the enemy to the enemies list
+
+	var enemyAnim = new Kinetic.Animation(function(frame) {
+		// Once reach bound, remove the enemy plane
+		if (enemy.getY() >= stage.getAttr("height") + 20){
+			remove(enemies, enemy, this, enemies.indexOf(enemy));
+		}
+		
+		// Make the bomb based on the random position generated
+		if (enemy.getY() == bulletY) {
+			var angle;
+			for (angle = 0; angle <= 5; angle++) {
+				enemyBullet(body, enemy, layer, angle * 60);
+			}
+		}
+		// Define the collision logic here
+		
+		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
+		if (distance <= 50) {
+			// The player is dead
+			body.remove();
+			remove(enemies, enemy, this, enemies.indexOf(enemy));  // Remove the enemy plane
+			explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+			dead(body.getX(), body.getY(), layer);
+		}
+
+		for (var i = 0; i < bullets.length; i++) {
+			// Get coordinate and distance between bullets and this enemy
+			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
+			if (distance2 <= 30) {
+				// Enemy hit by bullets, remove enemy and stop the animation
+				explosion(enemy.getX(), enemy.getY(), layer);
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+				remove(enemies, enemy, this, enemies.indexOf(enemy));
+				points += 1;
+				writeMessage(messageLayer, points);
+			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				// If the bullet hit the bound, remove the bullet and stop its animation
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+			} 
+		}
+		enemy.setY(enemy.getY() + 4);
+	}, layer);
+	enemyAnim.start();
+	enemiesAnim.push(enemyAnim);
+};
+
