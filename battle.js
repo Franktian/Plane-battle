@@ -8,30 +8,40 @@ var bullets = [];  // Keep track of the bullets
 var enemies = [];  // Keep track of the enemies
 var enemiesAnim = []; // Keep track of the enemy animations
 var points = 0;  //  Keep track of the points the player got
+var protectPlayer = false;
+var deadSound = new Audio('audios/explosion2.mp3');
 var messageLayer = new Kinetic.Layer();
-stage.add(messageLayer);
-var background = new Kinetic.Rect({
-        x: 0,
-        y: 0,
-        width:stage.getWidth(),
-        height:stage.getHeight(),stroke: 'black',
-        strokeWidth: 1
+
+
+
+// Add a background image
+
+var backgroundObj = new Image();
+backgroundObj.src = "pictures/background1.jpg";
+var background = new Kinetic.Image({
+	x: 0,
+	y: 0,
+	image: backgroundObj,
+	width:stage.getWidth(),
+	height:stage.getHeight(),
+	opacity: 1
 });
 layer.add(background);
 
 var bodyObj = new Image();
-bodyObj.src = "pictures/plane.png";
+bodyObj.src = "pictures/ourplane.png";
 var body = new Kinetic.Image({
 	x:stage.getWidth()/2,
 	y:stage.getHeight()/2,
 	image: bodyObj,
-	width: 60,
-	height: 80,
-	offset: [30, 40]
+	width: 80,
+	height: 100,
+	offset: [40, 50]
 });
  
 layer.add(body);
 stage.add(layer);
+stage.add(messageLayer);
 
 // Moving animation for body
 var animRight = new Kinetic.Animation(function(frame) {
@@ -104,16 +114,19 @@ window.addEventListener('keyup', function(e) {
 });
 
 function writeMessage(messageLayer, message) {
+		messageLayer.moveToTop();
 		var context = messageLayer.getContext();
 		messageLayer.clear();
-		context.font = '18pt Calibri';
-		context.fillStyle = 'black';
-		context.fillText(message, 50, 25);  // The position to be displayed on the stage
+		context.font = '10pt Calibri';
+		context.fillStyle = 'yellow';
+		context.fillText(message, 500, 25);  // The position to be displayed on the stage
 };
 // Create a bullet
 
 function createBullet(body, layer, angle) {
 	// The bullet body
+	var shotSound = new Audio('audios/gunshot.mp3');
+	shotSound.play();
 	var bx = 8 * Math.cos(angle * Math.PI / 180);
 	var by = 8 * Math.sin(angle * Math.PI / 180);
 	
@@ -149,7 +162,7 @@ function enemyBullet(body, enemy, layer, angle) {
 	
 	// Create the bullet object
 	var bulletObj = new Image();
-	bulletObj.src = "pictures/bullet.png";
+	bulletObj.src = "pictures/bullet2.png";
 	var bullet = new Kinetic.Image({
 		x:enemy.getX(),
 		y:enemy.getY(),
@@ -159,8 +172,7 @@ function enemyBullet(body, enemy, layer, angle) {
 		rotationDeg: angle + 90
 	});
 	layer.add(bullet);
-	
-	
+
 	var animBullet = new Kinetic.Animation(function(frame) {
 		bullet.setX(bullet.getX() + bx);
 		bullet.setY( bullet.getY() + by);
@@ -172,8 +184,8 @@ function enemyBullet(body, enemy, layer, angle) {
 			body.remove();
 			bullet.remove();
 			this.stop();
-			alert("You lose!!!!!!!");
-			window.location.href = "start-page.html";
+			dead(body.getX(), body.getY(), layer);
+
 		}
 		// Check boundary, once hit the bound, remove the bullet and stop the animation
 		if (bullet.getY() <= 5 || bullet.getY() >= stage.getAttr("height") - 50 || bullet.getX() <= 50 || bullet.getX() >= stage.getAttr("width") - 50) {
@@ -184,12 +196,12 @@ function enemyBullet(body, enemy, layer, angle) {
 	animBullet.start();
 };
 
-window.setInterval(
+var bulletId = setInterval(
 	function(){
 		createBullet(body, layer, 270);
 	}
 , 250);
-
+protection(layer);  // Protect the player
 function enermy() {
 	// Function for displaying enemy planes
 	
@@ -200,16 +212,16 @@ function enermy() {
 	
 	// Create an enemy variable with random position
 	var enemyObj = new Image();
-	enemyObj.src = "pictures/enemy.png";
+	enemyObj.src = "pictures/enemy1.png";
 	// Create an enemy variable with random position
 	var enemy = new Kinetic.Image({
 		x: px,
 		y: py,
 		image: enemyObj,
-		width: 20,
-		height: 30,
+		width: 30,
+		height: 40,
 		rotationDeg: 180,
-		offset: [10, 15]
+		offset: [15, 20]
 	});
 
 	layer.add(enemy); // Add the enemy variable to layer
@@ -225,25 +237,39 @@ function enermy() {
 		// Make the bomb based on the random position generated
 		if (enemy.getY() == bulletY) {
 			var angle;
-			for (angle = 0; angle <= 6; angle++) {
+			for (angle = 0; angle <= 5; angle++) {
 				enemyBullet(body, enemy, layer, angle * 60);
 			}
 		}
 		// Define the collision logic here
+		
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 30) {
-			body.remove();
-			enemy.remove();
-			this.stop();
-			alert("YOU LOSE!!!!");
-			window.location.href = "start-page.html";
+		if (protectPlayer != true) {
+			if (distance <= 50) {
+				// The player is dead
+				body.remove();
+				enemy.remove();
+				this.stop();
+				explosion(enemy.getX(), enemy.getY(), layer);
+				dead(body.getX(), body.getY(), layer);
+			}
+		} else {
+			// The player is currently under protection
+			if (distance <= 100) {
+				enemy.remove();
+				this.stop();
+				explosion(enemy.getX(), enemy.getY(), layer);
+			}
 		}
 
 		for (var i = 0; i < bullets.length; i++) {
 			// Get coordinate and distance between bullets and this enemy
 			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
-			if (distance2 <= 25) {
+			if (distance2 <= 30) {
 				// Enemy hit by bullets, remove enemy and stop the animation
+				
+				
+				explosion(enemy.getX(), enemy.getY(), layer);
 				enemies.splice(enemies.indexOf(enemy), 1);
 				enemy.remove();
 				this.stop();
@@ -265,6 +291,7 @@ function enermy() {
 	enemiesAnim.push(enemyAnim);
 };
 
+
 // Function for shooting the bullets in all 360 degrees
 function allDegree() {
 	if (i < 36) {
@@ -274,7 +301,7 @@ function allDegree() {
 	}
 };
 
-window.setInterval(function(){
+var enemyID = window.setInterval(function(){
 	enermy();
 }, 200);
 // Effect for the explosion
@@ -287,3 +314,437 @@ function getDistance(x1, y1, x2, y2) {
 	return distance;
 };
 
+function explosion(x, y, layer) {
+	// Animations for the explosion sprite
+	var explosionSound = new Audio('audios/explosion1.mp3');
+	explosionSound.play();
+	var animations = {
+		walkCycle: [{
+			x: 0,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 0,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 64,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 128,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 192,
+			width: 64,
+			height: 64
+		}, {
+			x: 0,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 64,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 128,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 192,
+			y: 256,
+			width: 64,
+			height: 64
+		}, {
+			x: 256,
+			y: 256,
+			width: 64,
+			height: 64
+		}]
+	};
+	var explosionObj = new Image();
+	explosionObj.src = "pictures/explosion.png";
+	var blob = new Kinetic.Sprite({
+		x: x - 20,
+		y: y - 20,
+		image: explosionObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 40,
+	});
+	layer.add(blob);
+	blob.start();
+	blob.afterFrame(24, function(){
+		blob.remove();
+	});
+};
+
+// Animation to display when the player's battle is crashed
+function dead(x, y, layer) {
+	deadSound.play();
+	clearInterval(bulletId);
+	var animations = {
+		walkCycle: [{
+			x: 0,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 256,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 512,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 768,
+			y: 0,
+			width: 128,
+			height: 128
+		},  {
+			x: 1024,
+			y: 0,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 128,
+			width: 128,
+			height: 128
+		},  {
+			x: 256,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 128,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 256,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 384,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 512,
+			width: 128,
+			height: 128
+		}, {
+			x: 0,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 128,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 256,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 384,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 512,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 640,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 768,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 896,
+			y: 640,
+			width: 128,
+			height: 128
+		}, {
+			x: 1024,
+			y: 640,
+			width: 128,
+			height: 128
+		}]
+	};
+	var explosionObj = new Image();
+	explosionObj.src = "pictures/explosion3.png";
+	var blob = new Kinetic.Sprite({
+		x: x - 40,
+		y: y - 50,
+		image: explosionObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 25,
+	});
+	layer.add(blob);
+	blob.start();
+	
+	
+	blob.afterFrame(35, function(){
+		blob.remove();
+		window.location.href = "end-page.html";
+	});
+};
+
+// Create a temporary  protection for the player
+function protection(layer) {
+	var circle = new Kinetic.Circle({
+		x: body.getX(),
+		y: body.getY(),
+		radius: 100,
+		fill: 'red',
+		opacity: 0.5
+	});
+	layer.add(circle);
+	
+	protectPlayer = true;
+}

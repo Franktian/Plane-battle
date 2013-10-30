@@ -1,26 +1,133 @@
 <!DOCTYPE HTML>
 <html>
   <head>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
     <style>
 		body {
-		margin: 0px;
-		padding: 0px;
+			margin: 0px;
+			padding: 0px;
 		}
-		div#container {
-			margin-left: Auto;
-			margin-right: Auto;
-			width: 960;
-		}
-		
     </style>
-
-	
+	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+	<script src="api.js"></script>
   </head>
   <body>
 	<p>"up", "down", "left", "right" to move, "Space" to .... Watch out this challenging version!!!!</p>
-    <div id="container"></div>
+	<div id="all">
+		<div id="container"></div>
+	</div>
     <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
-    <script src="battle.js"></script>
+    <script>
+		/*********************Initialize the related variables***********************/
+		// Create the stage on the container
+		var stage = new Kinetic.Stage({
+			container: 'container',
+			width: 1024,
+			height: 600
+		});
+		var layer = new Kinetic.Layer();  // Layer to display what's happening
+		var bullets = [];  // Keep track of the bullets
+		var enemies = [];  // Keep track of the enemies
+		var enemiesAnim = []; // Keep track of the enemy animations
+		var points = 0;  //  Keep track of the points the player got
+		var protectPlayer = false;
+		var i = 0;  // Variable to initialize 360 degree shooting
+		var messageLayer = new Kinetic.Layer();
+		// Add a background image
+		var background = loadImage(0, 0, stage.getWidth(), stage.getHeight(), layer, "pictures/background1.jpg", 1, [0, 0], 0);
+		// Load the player image
+		var body = loadImage(stage.getWidth()/2, stage.getHeight()/2, 80, 100, layer, "pictures/ourplane.png", 1, [40, 50], 0);
+		/*********************Initialize the related variables***********************/
+		stage.add(layer);
+		stage.add(messageLayer);
+
+		/*********************Moving animation for body*******************************/
+		var animRight = new Kinetic.Animation(function(frame) {
+			// Animation to right
+			if (body.getX() <= stage.getAttr("width") - 80) {
+				body.setX(body.getX() + 5);
+			}  
+		}, layer);
+
+		var animUp = new Kinetic.Animation(function(frame) {
+			// Animation to up
+			if (body.getY() >= 10) {
+				body.setY(body.getY() - 5);
+			}
+		}, layer);
+
+		var animLeft = new Kinetic.Animation(function(frame) {
+			// Animation to left
+			if (body.getX() >= 10) {
+				body.setX(body.getX() - 5);
+			}
+		}, layer);
+
+		var animDown = new Kinetic.Animation(function(frame) {
+			// Animation to down
+			if (body.getY() <= stage.getAttr("height") - 55) {
+			  body.setY(body.getY() + 5);
+			}
+		}, layer);
+		/*********************Moving animation for body*******************************/
+		
+		/*********************Event for control the body*****************************/
+		window.addEventListener('keydown', function(e) {
+			switch (e.keyCode) {
+				case 37:
+					// Left
+					animLeft.start();
+					break;
+				case 38:
+					// Up
+					animUp.start();
+					break;
+				case 39:
+					// Right
+					animRight.start();
+					break;
+				case 40:
+					// Down
+					animDown.start();
+					break;
+				case 32:
+					i = 0;
+					allDegree();
+					break;
+			}
+		});
+		window.addEventListener('keyup', function(e) {
+			switch (e.keyCode) {
+				case 37:
+					animLeft.stop();
+					break;
+				case 38:
+					animUp.stop();
+					break;
+				case 39:
+					animRight.stop();
+					break;
+				case 40:
+					animDown.stop();
+					break;
+			}
+		});
+		/*********************Event for control the body*****************************/
+		var bulletId = setInterval(
+			// Create a bullet every 0.25 second
+			function(){
+				createBullet(body, layer, 270, bullets);
+			}
+		, 250);
+
+		// Function for shooting the bullets in all 360 degrees
+
+		var enemyID = setInterval(function(){
+			// Create an enemy plane randomly every 0.2 second
+			enermy(layer, enemies, bullets, body);
+		}, 200);
+	</script>
 	
   </body>
 </html>

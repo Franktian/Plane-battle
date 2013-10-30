@@ -2,24 +2,40 @@
 <html>
   <head>
     <style>
-      body {
-        margin: 0px;
-        padding: 0px;
-      }
+		body {
+		margin: 0px;
+		padding: 0px;
+		}
+		#all {
+			position:relative;
+		}
+		#container {
+			position:absolute;
+			z-index:2;
+		}
+		#test {
+			position:absolute;
+			z-index:3;
+		}
     </style>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
-</script>
-<script>
-</script>	
+	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+	<script>
+	</script>
+
   </head>
   <body>
   <p>Mouse is at coordinates: <span></span>.</p>
-    <div id="container"></div>
+	<div id="all">
+		<div id="container"></div>
+	</div>
     <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
     <script defer="defer">
+	var buttonSound = new Audio('audios/button.mp3');
+	var clickSound = new Audio('audios/click.mp3');
 	$(document).ready(function(){
-		$(document).mousemove(function(event){
-			$("span").text(event.pageX + ", " + event.pageY);
+		$('#container').mousemove(function(event){
+			$("span").text(event.pageX + ", " + event.pageY + "New.zindex is " + yoda.getZIndex());
 			if (event.pageX >= 358 && event.pageX <= 623 && event.pageY >= 422 && event.pageY <= 492) {
 				// About us page
 				aboutUs.moveToTop();
@@ -34,6 +50,7 @@
 			}
 			if (event.pageX >= 373 && event.pageX <= 606 && event.pageY >= 512 && event.pageY <= 579) {
 				// Option game page
+				
 				option.moveToTop();
 				topimage="option";
 				stage.draw();
@@ -44,44 +61,56 @@
 				window.location.href = "battle.html";
 			}
 		});
-		
 	});
 
-		var topimage = "option";	// Variable that indicates the page on the top.
-		window.addEventListener('keyup', function(e) {
-			switch (e.keyCode) {
-				case 38:{
-					if(topimage=="aboutUs"){
-						yoda.moveToTop();				
-						topimage="yoda";
-						stage.draw();
-					}		
-					else if(topimage=="option"){				
-						aboutUs.moveToTop();
-						topimage="aboutUs";
-						stage.draw();
-					}					
-					break;						
+	var topimage = "yoda";	// Variable that indicates the page on the top.
+	window.addEventListener('keyup', function(e) {
+		switch (e.keyCode) {
+			case 38:{
+				buttonSound.play();
+				if(topimage=="aboutUs"){
+					yoda.moveToTop();				
+					topimage="yoda";
+					stage.draw();
+				}		
+				else if(topimage=="option"){
+					aboutUs.moveToTop();
+					topimage="aboutUs";
+					stage.draw();
 				}
-				case 40:{
-					if(topimage=="aboutUs"){
-						option.moveToTop();
-						topimage="option";
-						stage.draw();
-					}		
-					else if(topimage=="yoda"){ 
-						aboutUs.moveToTop();
-						topimage="aboutUs"; 
-						stage.draw(); 
-					}
-					break;			
+				else if(topimage=="yoda"){
+					option.moveToTop();
+					topimage="option";
+					stage.draw();
+				}					
+				break;						
+			}
+			case 40:{
+				buttonSound.play();
+				if(topimage=="aboutUs"){
+					option.moveToTop();
+					topimage="option";
+					stage.draw();
+				}		
+				else if(topimage=="yoda"){ 
+					buttonSound.play();
+					aboutUs.moveToTop();
+					topimage="aboutUs"; 
+					stage.draw(); 
 				}
-				case 13:{
-					if(topimage=="yoda")
-						window.location.href = "battle.html";
+				else if(topimage=="option"){
+					yoda.moveToTop();
+					topimage="yoda";
+					stage.draw();
 				}
-			}						
-		});
+				break;			
+			}
+			case 13:{
+				if(topimage=="yoda")
+					window.location.href = "battle.html";
+			}
+		}						
+	});
 
 		
 	var stage = new Kinetic.Stage({
@@ -91,17 +120,6 @@
 	});
 	var layer = new Kinetic.Layer();
 
-	var imageObj = new Image();
-	imageObj.src = "pictures/newgame.jpg";
-	var yoda = new Kinetic.Image({
-	  x: 0,
-	  y: 0,
-	  image: imageObj,
-	  width: 960,
-	  height: 600
-	});
-	// add the shape to the layer
-	layer.add(yoda);
       
 	  
 	var aboutUsObj = new Image();
@@ -126,15 +144,65 @@
 		height: 600
 	});
 	layer.add(option);
-
 	
+	var imageObj = new Image();
+	imageObj.src = "pictures/newgame.jpg";
+	var yoda = new Kinetic.Image({
+	  x: 0,
+	  y: 0,
+	  image: imageObj,
+	  width: 960,
+	  height: 600,
+	  opacity: 1
+	});
+	// add the shape to the layer
+	layer.add(yoda);
+	var mouseLayer = new Kinetic.Layer();
+	stage.add(mouseLayer);
 	
+	// Variables to play sound
+	var newGame = new Kinetic.Rect({
+		x: 335,
+		y: 275,
+		width: 308,
+		height: 70,
+	});
+	newGame.on('mouseover', function() {
+		buttonSound.play();
+    });
+	newGame.on('mousedown', function() {
+		clickSound.play();
+	});
+	mouseLayer.add(newGame);
+	
+	var us = new Kinetic.Rect({
+		x: 360,
+		y: 372,
+		width: 250,
+		height: 70,
+	});
+	us.on('mouseover', function() {
+		buttonSound.play();
+	});
+	mouseLayer.add(us);
+	
+	var op = new Kinetic.Rect({
+		x: 370,
+		y: 460,
+		width: 230,
+		height: 70,
+	});
+	op.on('mouseover', function() {
+		buttonSound.play();
+	});
+	mouseLayer.add(op);
 	stage.add(layer);
+	stage.add(mouseLayer);
+	
 	// When loaded the page, draw the stage immediately
 	window.onload = function() {
 		stage.draw();
-	}
-	
+	};
 
     </script>
 	
