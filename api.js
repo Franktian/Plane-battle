@@ -25,7 +25,7 @@ function createBullet(body, layer, angle, bullets) {
 	var by = 8 * Math.sin(angle * Math.PI / 180);
 	
 	// Load the bullet image
-	var bullet = loadImage(body.getX() - 5, body.getY() - 40, 12, 25, layer, "pictures/bullet.png", 1, [0, 0], angle + 90);
+	var bullet = loadImage(body.getX() - 5, body.getY() - 40, 8, 15, layer, "pictures/bullet.png", 1, [0, 0], angle + 90);
 	
 	// Create the bullet animation
 	var animBullet = new Kinetic.Animation(function(frame) {
@@ -54,7 +54,7 @@ function enemyBullet(body, enemy, layer, angle) {
 	var by = 6 * Math.sin(angle * Math.PI / 180);
 	
 	// Create the bullet object	
-	var bullet = loadImage(enemy.getX(), enemy.getY(), 12, 25, layer, "pictures/bullet2.png", 1, [0, 0], angle + 90);
+	var bullet = loadImage(enemy.getX(), enemy.getY(), 8, 15, layer, "pictures/bullet2.png", 1, [0, 0], angle + 90);
 
 	var animBullet = new Kinetic.Animation(function(frame) {
 		bullet.setX(bullet.getX() + bx);
