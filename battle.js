@@ -1,7 +1,7 @@
 var stage = new Kinetic.Stage({
 	container: 'container',
 	width: 1024,
-	height: 1200
+	height: 600
 });
 var layer = new Kinetic.Layer();  // Layer to display what's happening
 var bullets = [];  // Keep track of the bullets
