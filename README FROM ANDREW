@@ -2,3 +2,11 @@ Well since there was no note of when we will be meeting, I just want to say I wo
 so that it actually looks like the plane is moving upwards the screen + other than that I would suggest adding bomb (space)
 counters, so you can only use 2 before you pick up more bomb ammos, and lets add more stuff like power up pick-ups 
 and such. But im guessing you already had this in mind
+
+UPDATE!
+I added Bomb Counter and not allowing the user to hold down the space button for the bomb action
+I added scrolling BG, but currently it just stretches the current BG's height by 2 and scrolls down BUT
+this means that the BG can come to an end.
+Here is the Question, how do you want the game to work? do you want it to work that theres an end boss where the BG
+stops scrolling down? ex. 1942 (the game), or make it act like it never ends, so that the scrolling animation loops?
+while on the subject, do you want the game to have a HP bar system? or a 1 hit die multiple life system?
