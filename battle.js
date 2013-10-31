@@ -1,7 +1,7 @@
 var stage = new Kinetic.Stage({
 	container: 'container',
 	width: 1024,
-	height: 600
+	height: 1200
 });
 var layer = new Kinetic.Layer();  // Layer to display what's happening
 var bullets = [];  // Keep track of the bullets
@@ -23,7 +23,7 @@ var background = new Kinetic.Image({
 	y: 0,
 	image: backgroundObj,
 	width:stage.getWidth(),
-	height:stage.getHeight(),
+	height:stage.getHeight()/2,
 	opacity: 1
 });
 layer.add(background);
