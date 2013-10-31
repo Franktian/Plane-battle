@@ -91,6 +91,7 @@ window.addEventListener('keydown', function(e) {
 		case 32:
 			i = 0;
 			allDegree();
+			allDegree().stop();
 			break;
 	}
 });
@@ -109,9 +110,6 @@ window.addEventListener('keyup', function(e) {
 			break;
 		case 40:
 			animDown.stop();
-			break;
-		case 32:
-			allDegree().stop();
 			break;
 	}
 });
