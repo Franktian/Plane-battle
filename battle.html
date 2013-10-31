@@ -26,6 +26,8 @@
 			width: 1024,
 			height: 600
 		});
+		var allowed = true; // So you cant just hold down on the bomb button
+		var bombCounter = 2; // Bomb Counter
 		var layer = new Kinetic.Layer();  // Layer to display what's happening
 		var bullets = [];  // Keep track of the bullets
 		var enemies = [];  // Keep track of the enemies
@@ -92,9 +94,17 @@
 					animDown.start();
 					break;
 				case 32:
-					i = 0;
-					allDegree();
-					break;
+					if ((!allowed) || (bombCounter == 0)) {
+			    			break;
+			  		} else {
+						i = 0;
+						allDegree();
+						bombCounter = bombCounter-1;
+						if (bombCounter < 0) 
+						  bombCounter = 0;
+						allowed = false;
+						break;
+			  		}
 			}
 		});
 		window.addEventListener('keyup', function(e) {
@@ -110,6 +120,9 @@
 					break;
 				case 40:
 					animDown.stop();
+					break;
+				case 32:
+					allowed = true;
 					break;
 			}
 		});
