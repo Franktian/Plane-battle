@@ -23,7 +23,7 @@ var background = new Kinetic.Image({
 	y: 0,
 	image: backgroundObj,
 	width:stage.getWidth(),
-	height:stage.getHeight()/2,
+	height:stage.getHeight(),
 	opacity: 1
 });
 layer.add(background);
@@ -109,6 +109,9 @@ window.addEventListener('keyup', function(e) {
 			break;
 		case 40:
 			animDown.stop();
+			break;
+		case 32:
+			allDegree().stop();
 			break;
 	}
 });
