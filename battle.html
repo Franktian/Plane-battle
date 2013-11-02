@@ -26,34 +26,21 @@
 			width: 1024,
 			height: 600
 		});
-		var allowed = true; // So you cant just hold down on the bomb button
-		var bombCounter = 2; // Bomb Counter
 		var layer = new Kinetic.Layer();  // Layer to display what's happening
-		var bg = new Kinetic.Layer(); // BG layer
 		var bullets = [];  // Keep track of the bullets
 		var enemies = [];  // Keep track of the enemies
-		var enemiesAnim = []; // Keep track of the enemy animations
+		var enemyBullets = [];
 		var points = 0;  //  Keep track of the points the player got
 		var protectPlayer = false;
 		var i = 0;  // Variable to initialize 360 degree shooting
 		var messageLayer = new Kinetic.Layer();
 		// Add a background image
-		var background = loadImage(0, 0, stage.getWidth(), stage.getHeight(), bg, "pictures/background.jpg", 1, [0, 0], 0);
+		var background = loadImage(0, 0, stage.getWidth(), stage.getHeight(), layer, "pictures/background.jpg", 1, [0, 0], 0);
 		// Load the player image
 		var body = loadImage(stage.getWidth()/2, stage.getHeight()/2, 80, 100, layer, "pictures/ourplane.png", 1, [40, 50], 0);
 		/*********************Initialize the related variables***********************/
-		stage.add(bg);
 		stage.add(layer);
 		stage.add(messageLayer);
-
-		/*********************Moving animation for BG*********************************/
-		var amplitude = 70;
-		var period = 4000;
-		var anim = new Kinetic.Animation(function(frame) {
-		  bg.setY(amplitude * Math.abs(frame.time * 2 / period));
-		}, bg);
-		
-		anim.start();
 
 		/*********************Moving animation for body*******************************/
 		var animRight = new Kinetic.Animation(function(frame) {
@@ -83,6 +70,15 @@
 			  body.setY(body.getY() + 5);
 			}
 		}, layer);
+		
+		
+		// Control the player plane with mouse
+		var animMouse = new Kinetic.Animation(function(frame) {
+			$('#container').mousemove(function(event) {
+				body.setX(event.pageX);
+				body.setY(event.pageY - 50);
+			});
+		});
 		/*********************Moving animation for body*******************************/
 		
 		/*********************Event for control the body*****************************/
@@ -105,18 +101,13 @@
 					animDown.start();
 					break;
 				case 32:
-					if ((!allowed) || (bombCounter == 0)) {
-			    			break;
-			  		} else {
-						i = 0;
-						allDegree();
-						bombCounter = bombCounter-1;
-						if (bombCounter < 0) 
-						  bombCounter = 0;
-						allowed = false;
-						break;
-			  		}
-			}
+					i = 0;
+					allDegree();
+					break;
+				case 70:
+					protection(layer, body, enemyBullets, enemies);
+					break;
+			};
 		});
 		window.addEventListener('keyup', function(e) {
 			switch (e.keyCode) {
@@ -132,9 +123,6 @@
 				case 40:
 					animDown.stop();
 					break;
-				case 32:
-					allowed = true;
-					break;
 			}
 		});
 		/*********************Event for control the body*****************************/
@@ -149,7 +137,7 @@
 
 		var enemyID = setInterval(function(){
 			// Create an enemy plane randomly every 0.2 second
-			enermy(layer, enemies, bullets, body);
+			enermy(layer, enemies, bullets, body, enemyBullets);
 		}, 200);
 	</script>
 	
