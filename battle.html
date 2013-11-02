@@ -29,7 +29,7 @@
 		var layer = new Kinetic.Layer();  // Layer to display what's happening
 		var bullets = [];  // Keep track of the bullets
 		var enemies = [];  // Keep track of the enemies
-		var enemiesAnim = []; // Keep track of the enemy animations
+		var enemyBullets = [];
 		var points = 0;  //  Keep track of the points the player got
 		var protectPlayer = false;
 		var i = 0;  // Variable to initialize 360 degree shooting
@@ -70,6 +70,15 @@
 			  body.setY(body.getY() + 5);
 			}
 		}, layer);
+		
+		
+		// Control the player plane with mouse
+		var animMouse = new Kinetic.Animation(function(frame) {
+			$('#container').mousemove(function(event) {
+				body.setX(event.pageX);
+				body.setY(event.pageY - 50);
+			});
+		});
 		/*********************Moving animation for body*******************************/
 		
 		/*********************Event for control the body*****************************/
@@ -95,7 +104,10 @@
 					i = 0;
 					allDegree();
 					break;
-			}
+				case 70:
+					protection(layer, body, enemyBullets, enemies);
+					break;
+			};
 		});
 		window.addEventListener('keyup', function(e) {
 			switch (e.keyCode) {
@@ -125,7 +137,7 @@
 
 		var enemyID = setInterval(function(){
 			// Create an enemy plane randomly every 0.2 second
-			enermy(layer, enemies, bullets, body);
+			enermy(layer, enemies, bullets, body, enemyBullets);
 		}, 200);
 	</script>
 	

@@ -4,12 +4,49 @@ function writeMessage(messageLayer, message) {
 	 * messageLayer: the layer to print the message on
 	 * message: The message to be printed
 	 */
-	messageLayer.moveToTop();
-	var context = messageLayer.getContext();
-	messageLayer.clear();
-	context.font = '10pt Calibri';
-	context.fillStyle = 'yellow';
+	 messageLayer.clear();
+	var canvas = messageLayer.getCanvas();
+	var context = canvas.getContext("2d");
+	context.font="italic 40pt Calibri";
+	context.fillStyle="#FF0000";
 	context.fillText(message, 500, 25);  // The position to be displayed on the stage
+	//context.fillRect(20,20,150,100);
+};
+
+function protection(layer, body, bullets, enemies) {
+	/**
+	 * Create a temporary protection area
+	 */
+	var circle = new Kinetic.Circle({
+		x: body.getX(),
+		y: body.getY(),
+		radius: 100,
+		fill: 'red',
+		opacity: 0.5,
+	});
+	layer.add(circle);
+	
+	var circleAnim = new Kinetic.Animation(function(frame){
+		circle.setX(body.getX());
+		circle.setY(body.getY());
+
+		for (var i = 0; i < enemies.length; i++) {
+			var distance1 = getDistance(circle.getX(), circle.getY(), enemies[i][0].getX(), enemies[i][0].getY());
+			if (distance1 <= 100) {
+				explosion(enemies[i][0].getX(), enemies[i][0].getY(), layer);
+				remove(enemies, enemies[i][0], enemies[i][1], i);
+			}
+		}
+
+		for (var j = 0; j < bullets.length; j++) {
+			var distance2 = getDistance(circle.getX(), circle.getY(), bullets[j][0].getX(), bullets[j][0].getY());
+			if (distance2 <= 100) {
+				explosion(bullets[j][0].getX(), bullets[j][0].getY(), layer);
+				remove(bullets, bullets[j][0], bullets[j][1], j);
+			}
+		}
+	}, layer);
+	circleAnim.start();
 };
 
 function createBullet(body, layer, angle, bullets) {
@@ -40,7 +77,7 @@ function createBullet(body, layer, angle, bullets) {
 	bullets.push(bulletPair);
 };
 
-function enemyBullet(body, enemy, layer, angle) {
+function enemyBullet(body, enemy, layer, angle, enemyBullets) {
 	/**
 	 * Function for the enemy plane to shoot bullets
 	 * body: track the coordinate of the player
@@ -65,20 +102,82 @@ function enemyBullet(body, enemy, layer, angle) {
 		if (distance <= 30) {
 			// The player lose the game, remove the player plane and the bullet, stop animation
 			body.remove();
-			bullet.remove();
-			this.stop();
+			remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
 			dead(body.getX(), body.getY(), layer);
 
 		}
 		// Check boundary, once hit the bound, remove the bullet and stop the animation
 		if (bullet.getY() <= 5 || bullet.getY() >= stage.getAttr("height") - 50 || bullet.getX() <= 50 || bullet.getX() >= stage.getAttr("width") - 50) {
-			bullet.remove();
-			this.stop();
+			remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
 		}
 	});
 	animBullet.start();
+
+	var bulletPair = [];
+	bulletPair.push(bullet);
+	bulletPair.push(animBullet);
+	enemyBullets.push(bulletPair);
 };
 
+function enermy(layer, enemies, bullets, body, enemyBullets) {
+	// Function for displaying enemy planes
+
+	// Get a random position for the plane
+	var px = Math.floor((Math.random()*1024) + 1);
+	var py = 0;
+	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
+	
+	// Create an enemy variable with random position
+	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
+
+	var enemyAnim = new Kinetic.Animation(function(frame) {
+		// Once reach bound, remove the enemy plane
+		if (enemy.getY() >= stage.getAttr("height") + 20){
+			remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+		}
+		
+		// Make the bomb based on the random position generated
+		if (enemy.getY() == bulletY) {
+			var angle;
+			for (angle = 0; angle <= 5; angle++) {
+				enemyBullet(body, enemy, layer, angle * 60, enemyBullets);
+			}
+		}
+		// Define the collision logic here
+		
+		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
+		if (distance <= 50) {
+			// The player is dead
+			body.remove();
+			remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+			explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+			dead(body.getX(), body.getY(), layer);
+		}
+
+		for (var i = 0; i < bullets.length; i++) {
+			// Get coordinate and distance between bullets and this enemy
+			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
+			if (distance2 <= 30) {
+				// Enemy hit by bullets, remove enemy and stop the animation
+				explosion(enemy.getX(), enemy.getY(), layer);
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+				points += 1;
+				writeMessage(messageLayer, points);
+			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				// If the bullet hit the bound, remove the bullet and stop its animation
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+			} 
+		}
+		enemy.setY(enemy.getY() + 4);
+	}, layer);
+	enemyAnim.start();
+	
+	var enemyPair = [];
+	enemyPair.push(enemy);
+	enemyPair.push(enemyAnim);
+	enemies.push(enemyPair);
+};
 
 function allDegree() {
 	if (i < 36) {
@@ -110,135 +209,20 @@ function explosion(x, y, layer) {
 	explosionSound.play();
 	
 	// Get the animation picture coordinates
-	var animations = {
-		walkCycle: [{
-			x: 0,
-			y: 0,
-			width: 64,
-			height: 64
-		}, {
-			x: 64,
-			y: 0,
-			width: 64,
-			height: 64
-		}, {
-			x: 128,
-			y: 0,
-			width: 64,
-			height: 64
-		}, {
-			x: 192,
-			y: 0,
-			width: 64,
-			height: 64
-		}, {
-			x: 256,
-			y: 0,
-			width: 64,
-			height: 64
-		}, {
-			x: 0,
-			y: 64,
-			width: 64,
-			height: 64
-		}, {
-			x: 64,
-			y: 64,
-			width: 64,
-			height: 64
-		}, {
-			x: 128,
-			y: 64,
-			width: 64,
-			height: 64
-		}, {
-			x: 192,
-			y: 64,
-			width: 64,
-			height: 64
-		}, {
-			x: 256,
-			y: 64,
-			width: 64,
-			height: 64
-		}, {
-			x: 0,
-			y: 128,
-			width: 64,
-			height: 64
-		}, {
-			x: 64,
-			y: 128,
-			width: 64,
-			height: 64
-		}, {
-			x: 128,
-			y: 128,
-			width: 64,
-			height: 64
-		}, {
-			x: 192,
-			y: 128,
-			width: 64,
-			height: 64
-		}, {
-			x: 256,
-			y: 128,
-			width: 64,
-			height: 64
-		}, {
-			x: 0,
-			y: 192,
-			width: 64,
-			height: 64
-		}, {
-			x: 64,
-			y: 192,
-			width: 64,
-			height: 64
-		}, {
-			x: 128,
-			y: 192,
-			width: 64,
-			height: 64
-		}, {
-			x: 192,
-			y: 192,
-			width: 64,
-			height: 64
-		}, {
-			x: 256,
-			y: 192,
-			width: 64,
-			height: 64
-		}, {
-			x: 0,
-			y: 256,
-			width: 64,
-			height: 64
-		}, {
-			x: 64,
-			y: 256,
-			width: 64,
-			height: 64
-		}, {
-			x: 128,
-			y: 256,
-			width: 64,
-			height: 64
-		}, {
-			x: 192,
-			y: 256,
-			width: 64,
-			height: 64
-		}, {
-			x: 256,
-			y: 256,
-			width: 64,
-			height: 64
-		}]
-	};
-	
+	var animations = {};
+	animations['walkCycle'] = [];
+	for (var i = 0; i <= 256; i = i + 64) {
+		for (var j = 0; j <= 256; j = j + 64) {
+			animations['walkCycle'].push(
+					{
+						x: j,
+						y: i,
+						width: 64,
+						height: 64
+					}
+				);
+		}
+	}
 	// Create the explosion animation objects
 	var explosionObj = new Image();
 	explosionObj.src = "pictures/explosion.png";  // Get the url
@@ -248,11 +232,11 @@ function explosion(x, y, layer) {
 		image: explosionObj,
 		animation: 'walkCycle',
 		animations: animations,
-		frameRate: 40,
+		frameRate: 40
 	});
 	layer.add(blob);
 	blob.start();
-	
+
 	// After the whole explosion cycle has finished, remove the explosion object
 	blob.afterFrame(24, function(){
 		blob.remove();
@@ -268,254 +252,20 @@ function dead(x, y, layer) {
 	var deadSound = new Audio('audios/explosion2.mp3');
 	deadSound.play();
 	clearInterval(bulletId);
-	var animations = {
-		walkCycle: [{
-			x: 0,
-			y: 0,
-			width: 128,
-			height: 128
-		},  {
-			x: 256,
-			y: 0,
-			width: 128,
-			height: 128
-		},  {
-			x: 512,
-			y: 0,
-			width: 128,
-			height: 128
-		},  {
-			x: 768,
-			y: 0,
-			width: 128,
-			height: 128
-		},  {
-			x: 1024,
-			y: 0,
-			width: 128,
-			height: 128
-		}, {
-			x: 0,
-			y: 128,
-			width: 128,
-			height: 128
-		},  {
-			x: 256,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 384,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 512,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 640,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 768,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 896,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 1024,
-			y: 128,
-			width: 128,
-			height: 128
-		}, {
-			x: 0,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 128,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 256,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 384,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 512,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 640,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 768,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 896,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 1024,
-			y: 256,
-			width: 128,
-			height: 128
-		}, {
-			x: 0,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 128,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 256,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 384,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 512,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 640,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 768,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 896,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 1024,
-			y: 384,
-			width: 128,
-			height: 128
-		}, {
-			x: 0,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 128,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 256,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 384,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 512,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 640,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 768,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 896,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 1024,
-			y: 512,
-			width: 128,
-			height: 128
-		}, {
-			x: 0,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 128,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 256,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 384,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 512,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 640,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 768,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 896,
-			y: 640,
-			width: 128,
-			height: 128
-		}, {
-			x: 1024,
-			y: 640,
-			width: 128,
-			height: 128
-		}]
-	};
+	var animations = {};
+	animations['walkCycle'] = [];
+	for (var i = 0; i <= 1024; i = i + 128) {
+		for (var j = 0; j <= 1024; j = j + 128) {
+			animations['walkCycle'].push(
+				{
+					x: j,
+					y: i,
+					width: 128,
+					height: 128
+				}
+			);
+		}
+	}
 	var explosionObj = new Image();
 	explosionObj.src = "pictures/explosion3.png";
 	var blob = new Kinetic.Sprite({
@@ -537,20 +287,6 @@ function dead(x, y, layer) {
 };
 
 
-function protection(layer) {
-	/**
-	 * Create a temporary protection area
-	 */
-	var circle = new Kinetic.Circle({
-		x: body.getX(),
-		y: body.getY(),
-		radius: 100,
-		fill: 'red',
-		opacity: 0.5
-	});
-	layer.add(circle);
-	protectPlayer = true;
-};
 
 function loadImage(x, y, width, height, layer, url, opacity, offset, rotation) {
 	/**
@@ -587,60 +323,4 @@ function remove(list, object, animation, i) {
 };
 
 
-function enermy(layer, enemies, bullets, body) {
-	// Function for displaying enemy planes
-
-	// Get a random position for the plane
-	var px = Math.floor((Math.random()*1024) + 1);
-	var py = 0;
-	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
-	
-	// Create an enemy variable with random position
-	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
-	enemies.push(enemy);  // Add the enemy to the enemies list
-
-	var enemyAnim = new Kinetic.Animation(function(frame) {
-		// Once reach bound, remove the enemy plane
-		if (enemy.getY() >= stage.getAttr("height") + 20){
-			remove(enemies, enemy, this, enemies.indexOf(enemy));
-		}
-		
-		// Make the bomb based on the random position generated
-		if (enemy.getY() == bulletY) {
-			var angle;
-			for (angle = 0; angle <= 5; angle++) {
-				enemyBullet(body, enemy, layer, angle * 60);
-			}
-		}
-		// Define the collision logic here
-		
-		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50) {
-			// The player is dead
-			body.remove();
-			remove(enemies, enemy, this, enemies.indexOf(enemy));  // Remove the enemy plane
-			explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-			dead(body.getX(), body.getY(), layer);
-		}
-
-		for (var i = 0; i < bullets.length; i++) {
-			// Get coordinate and distance between bullets and this enemy
-			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
-			if (distance2 <= 30) {
-				// Enemy hit by bullets, remove enemy and stop the animation
-				explosion(enemy.getX(), enemy.getY(), layer);
-				remove(bullets, bullets[i][0], bullets[i][1], i);
-				remove(enemies, enemy, this, enemies.indexOf(enemy));
-				points += 1;
-				writeMessage(messageLayer, points);
-			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
-				// If the bullet hit the bound, remove the bullet and stop its animation
-				remove(bullets, bullets[i][0], bullets[i][1], i);
-			} 
-		}
-		enemy.setY(enemy.getY() + 4);
-	}, layer);
-	enemyAnim.start();
-	enemiesAnim.push(enemyAnim);
-};
 
