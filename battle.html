@@ -13,12 +13,21 @@
 	<script src="api.js"></script>
   </head>
   <body>
-	<p>"up", "down", "left", "right" to move, "Space" to .... Watch out this challenging version!!!!</p>
+	<h1>"up", "down", "left", "right" to move, "Space" to BOOM!!!! "F" to enable mouse control, "S" to disable</h1>
+	<p>Your Score is: <span></span></p>
 	<div id="all">
 		<div id="container"></div>
 	</div>
     <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
     <script>
+		/*****************Pointers**********************/
+		$(document).ready(function(){
+			// Update the new score every 0.05 second
+			setInterval(function() {
+				$("span").text(points);
+			}, 50);
+		});
+		/*****************Pointers**********************/
 		/*********************Initialize the related variables***********************/
 		// Create the stage on the container
 		var stage = new Kinetic.Stage({
@@ -38,6 +47,7 @@
 		var background = loadImage(0, 0, stage.getWidth(), stage.getHeight(), layer, "pictures/background.jpg", 1, [0, 0], 0);
 		// Load the player image
 		var body = loadImage(stage.getWidth()/2, stage.getHeight()/2, 80, 100, layer, "pictures/ourplane.png", 1, [40, 50], 0);
+		var mouseEnable = false;
 		/*********************Initialize the related variables***********************/
 		stage.add(layer);
 		stage.add(messageLayer);
@@ -76,38 +86,40 @@
 		var animMouse = new Kinetic.Animation(function(frame) {
 			$('#container').mousemove(function(event) {
 				body.setX(event.pageX);
-				body.setY(event.pageY - 50);
+				body.setY(event.pageY - 150);
 			});
 		});
 		/*********************Moving animation for body*******************************/
 		
 		/*********************Event for control the body*****************************/
 		window.addEventListener('keydown', function(e) {
-			switch (e.keyCode) {
-				case 37:
-					// Left
-					animLeft.start();
-					break;
-				case 38:
-					// Up
-					animUp.start();
-					break;
-				case 39:
-					// Right
-					animRight.start();
-					break;
-				case 40:
-					// Down
-					animDown.start();
-					break;
-				case 32:
-					i = 0;
-					allDegree();
-					break;
-				case 70:
-					protection(layer, body, enemyBullets, enemies);
-					break;
-			};
+			if (mouseEnable == false) {
+				switch (e.keyCode) {
+					case 37:
+						// Left
+						animLeft.start();
+						break;
+					case 38:
+						// Up
+						animUp.start();
+						break;
+					case 39:
+						// Right
+						animRight.start();
+						break;
+					case 40:
+						// Down
+						animDown.start();
+						break;
+					case 32:
+						i = 0;
+						allDegree();
+						break;
+					case 70:
+						//protection(layer, body, enemyBullets, enemies);
+						break;
+				};
+			}
 		});
 		window.addEventListener('keyup', function(e) {
 			switch (e.keyCode) {
@@ -122,6 +134,15 @@
 					break;
 				case 40:
 					animDown.stop();
+					break;
+				case 70:
+					if (mouseEnable == false) {
+						animMouse.start();
+						mouseEnable = true;
+					} else {
+						animMouse.stop();
+						mouseEnable = false;
+					}
 					break;
 			}
 		});
