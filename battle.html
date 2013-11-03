@@ -48,10 +48,39 @@
 		// Load the player image
 		var body = loadImage(stage.getWidth()/2, stage.getHeight()/2, 80, 100, layer, "pictures/ourplane.png", 1, [40, 50], 0);
 		var mouseEnable = false;
+		var bombTimes = 3;
+		var bombList = [];
 		/*********************Initialize the related variables***********************/
 		stage.add(layer);
 		stage.add(messageLayer);
-
+		/*********************Circles that indicated the bombs you have**************/
+		var circle1 = new Kinetic.Circle({
+			x: 100,
+			y: 500,
+			radius: 15,
+			fill: 'red'
+		});
+		layer.add(circle1);
+		bombList.push(circle1);
+		
+		var circle2 = new Kinetic.Circle({
+			x: 150,
+			y: 500,
+			radius: 15,
+			fill: 'red'
+		});
+		layer.add(circle2);
+		bombList.push(circle2);
+		
+		var circle3 = new Kinetic.Circle({
+			x: 200,
+			y: 500,
+			radius: 15,
+			fill: 'red'
+		});
+		layer.add(circle3);
+		bombList.push(circle3);
+		/*********************Circles that indicated the bombs you have**************/
 		/*********************Moving animation for body*******************************/
 		var animRight = new Kinetic.Animation(function(frame) {
 			// Animation to right
@@ -112,8 +141,12 @@
 						animDown.start();
 						break;
 					case 32:
-						i = 0;
-						allDegree();
+						if (bombTimes > 0) {
+							i = 0;
+							allDegree();
+							bombList[bombTimes - 1].hide();
+							bombTimes -= 1;
+						}
 						break;
 					case 70:
 						//protection(layer, body, enemyBullets, enemies);
@@ -147,6 +180,8 @@
 			}
 		});
 		/*********************Event for control the body*****************************/
+		
+		/*********************Create the enemies*************************************/
 		var bulletId = setInterval(
 			// Create a bullet every 0.25 second
 			function(){
@@ -154,17 +189,56 @@
 			}
 		, 250);
 
-		// Function for shooting the bullets in all 360 degrees
-
-		var enemyID = setInterval(function(){
-			// Create an enemy plane randomly every 0.2 second
+		var basicEnemyId = setInterval(function(){
+			// Create a basic enemy every 0.3 second
+			enemy(layer, enemies, bullets, body, enemyBullets);
+		}, 300);
+		var enemyForwardID = setInterval(function(){
+			// Create an enemy plane that shoot bullet downwards every 1 second
 			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets);
-		}, 200);
+		}, 1000);
 		
 		var bombEnemyID = setInterval(function() {
 			// Create an enemy plane that release bomb every 2 second
-			enermy(layer, enemies, bullets, body, enemyBullets);
+			enemyBomb(layer, enemies, bullets, body, enemyBullets);
 		}, 2000);
+		
+		/*var towardPlayerID = setInterval(function(){
+			enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets);
+		}, 1000);*/
+		/*********************Create the enemies*************************************/
+		
+		/*****************************Create bonus bombs*****************************/
+		var bombID = setInterval(function() {
+			// Create a bonus every 5 seconds
+			var bonus = new Kinetic.Circle({
+				x: Math.floor((Math.random()*1024)),
+				y: 0,
+				radius: 5,
+				fill: 'red'
+			});
+			layer.add(bonus);
+			var bonusAnim = new Kinetic.Animation(function(frame) {
+				if (bonus.getY() >= 500) {
+					bonus.remove();
+					this.stop();
+				}
+				// If the player get this bonus, then he got an extra bomb!
+				var distance = getDistance(body.getX(), body.getY(), bonus.getX(), bonus.getY());
+				if (distance <= 35) {
+					bonus.remove();
+					this.stop();
+					if (bombTimes < 3) {
+						bombList[bombTimes].show();
+						bombTimes += 1;
+					}
+				}
+				
+				bonus.setY(bonus.getY() + 3);
+			}, layer);
+			bonusAnim.start();
+		}, 5000);
+		/*****************************Create bonus bombs*****************************/
 	</script>
 	
   </body>
