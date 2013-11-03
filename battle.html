@@ -219,7 +219,7 @@
 			});
 			layer.add(bonus);
 			var bonusAnim = new Kinetic.Animation(function(frame) {
-				if (bonus.getY() >= 500) {
+				if (bonus.getY() >= 600) {
 					bonus.remove();
 					this.stop();
 				}
@@ -229,6 +229,7 @@
 					bonus.remove();
 					this.stop();
 					if (bombTimes < 3) {
+						level(body.getX(), body.getY(), layer);
 						bombList[bombTimes].show();
 						bombTimes += 1;
 					}

@@ -397,7 +397,52 @@ function explosion(x, y, layer) {
 		blob.remove();
 	});
 };
+function level(x, y, layer) {
+	/**
+	 * Create a animation when picking up bonus
+	 */
+	var animations = {};
+	animations['walkCycle'] = [];
+	var out = 1;
+	for (var i = 0; i < 10; i++) {
+		if (out == 1) {
+			out = 0;
+		} else if (out == 0) {
+			out = 1;
+		}
+		animations['walkCycle'].push({
+			x: 0,
+			y: 0,
+			width: 100 * out,
+			height: 200 * out
+		});
+	}
+	
+	var levelObj = new Image();
+	levelObj.src = "pictures/level.png";
+	var Level = new Kinetic.Sprite({
+		x: x - 50,
+		y: y - 20,
+		image: levelObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 10,
+		opacity: 0.5
+	});
+	layer.add(Level);
+	Level.start();
+	
+	var levelAnim = new Kinetic.Animation(function(frame) {
+		Level.setX(body.getX() - 50);
+		Level.setY(body.getY() - 20);
+	}, layer);
+	levelAnim.start();
 
+	Level.afterFrame(9, function(){
+		Level.remove();
+		levelAnim.stop();
+	});
+}
 function dead(x, y, layer) {
 	/**
 	 * Create the dead effect when player plane is dead
@@ -476,4 +521,3 @@ function remove(list, object, animation, i) {
 	 object.remove();
 	 animation.stop();
 };
-
