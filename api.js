@@ -87,8 +87,8 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets) {
 	 */
 	// Bullet from enemy
 	// Get the shooting angle
-	var bx = 6 * Math.cos(angle * Math.PI / 180);
-	var by = 6 * Math.sin(angle * Math.PI / 180);
+	var bx = 8 * Math.cos(angle * Math.PI / 180);
+	var by = 8 * Math.sin(angle * Math.PI / 180);
 	
 	// Create the bullet object	
 	var bullet = loadImage(enemy.getX(), enemy.getY(), 8, 15, layer, "pictures/bullet2.png", 1, [0, 0], angle + 90);
@@ -118,6 +118,66 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets) {
 	bulletPair.push(animBullet);
 	enemyBullets.push(bulletPair);
 };
+
+function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets) {
+	/**
+	 * Create a enemy that shoots bullets directly downward every 0.8 second
+	 */
+	var px = Math.floor((Math.random()*1024) + 1);
+	var py = 0;
+	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
+	
+	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
+	var bulletInt = setInterval(function(){
+		enemyBullet(body, enemy, layer, 90, enemyBullets);
+	}, 800);
+	var enemyAnim = new Kinetic.Animation(function(frame) {
+		if (enemy.getY() >= stage.getAttr("height") + 20){
+			remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+			clearInterval(bulletInt);
+		}
+		
+		// Shoot the bullets downward
+		
+		
+
+		// Collision logic
+		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
+		if (distance <= 50) {
+			// The player is dead
+			body.remove();
+			remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+			explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+			dead(body.getX(), body.getY(), layer);
+		}
+
+		for (var i = 0; i < bullets.length; i++) {
+			// Get coordinate and distance between bullets and this enemy
+			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
+			if (distance2 <= 30) {
+				// Enemy hit by bullets, remove enemy and stop the animation
+				clearInterval(bulletInt);
+				explosion(enemy.getX(), enemy.getY(), layer);
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+				points += 1;
+				writeMessage(messageLayer, points);
+			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				// If the bullet hit the bound, remove the bullet and stop its animation
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+			}
+		}
+		
+		enemy.setY(enemy.getY() + 4);
+	}, layer);
+
+	enemyAnim.start();
+
+	var enemyPair = [];
+	enemyPair.push(enemy);
+	enemyPair.push(enemyAnim);
+	enemies.push(enemyPair);
+}
 
 function enermy(layer, enemies, bullets, body, enemyBullets) {
 	// Function for displaying enemy planes
