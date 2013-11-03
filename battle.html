@@ -158,8 +158,13 @@
 
 		var enemyID = setInterval(function(){
 			// Create an enemy plane randomly every 0.2 second
-			enermy(layer, enemies, bullets, body, enemyBullets);
+			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets);
 		}, 200);
+		
+		var bombEnemyID = setInterval(function() {
+			// Create an enemy plane that release bomb every 2 second
+			enermy(layer, enemies, bullets, body, enemyBullets);
+		}, 2000);
 	</script>
 	
   </body>
