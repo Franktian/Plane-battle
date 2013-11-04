@@ -13,7 +13,7 @@
 	<script src="api.js"></script>
   </head>
   <body>
-	<h1>"up", "down", "left", "right" to move, "Space" to BOOM!!!! "F" to enable mouse control, "S" to disable</h1>
+	<h3>"up", "down", "left", "right" to move, "Space" to BOOM!!!!</h3>
 	<p>Your Score is: <span></span></p>
 	<div id="all">
 		<div id="container"></div>
@@ -53,33 +53,13 @@
 		/*********************Initialize the related variables***********************/
 		stage.add(layer);
 		stage.add(messageLayer);
-		/*********************Circles that indicated the bombs you have**************/
-		var circle1 = new Kinetic.Circle({
-			x: 100,
-			y: 500,
-			radius: 15,
-			fill: 'red'
-		});
-		layer.add(circle1);
-		bombList.push(circle1);
-		
-		var circle2 = new Kinetic.Circle({
-			x: 150,
-			y: 500,
-			radius: 15,
-			fill: 'red'
-		});
-		layer.add(circle2);
-		bombList.push(circle2);
-		
-		var circle3 = new Kinetic.Circle({
-			x: 200,
-			y: 500,
-			radius: 15,
-			fill: 'red'
-		});
-		layer.add(circle3);
-		bombList.push(circle3);
+		/*********************Circles that indicated the bombs you have**************/		
+		var bonus1 = loadImage(100, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
+		bombList.push(bonus1);
+		var bonus2 = loadImage(150, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
+		bombList.push(bonus2);
+		var bonus3 = loadImage(200, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
+		bombList.push(bonus3);
 		/*********************Circles that indicated the bombs you have**************/
 		/*********************Moving animation for body*******************************/
 		var animRight = new Kinetic.Animation(function(frame) {
@@ -211,13 +191,8 @@
 		/*****************************Create bonus bombs*****************************/
 		var bombID = setInterval(function() {
 			// Create a bonus every 5 seconds
-			var bonus = new Kinetic.Circle({
-				x: Math.floor((Math.random()*1024)),
-				y: 0,
-				radius: 5,
-				fill: 'red'
-			});
-			layer.add(bonus);
+			var bonus = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/bomb.png", 1, [0, 0], 0);
+			
 			var bonusAnim = new Kinetic.Animation(function(frame) {
 				if (bonus.getY() >= 600) {
 					bonus.remove();
