@@ -50,9 +50,11 @@
 		var mouseEnable = false;
 		var bombTimes = 3;
 		var bombList = [];
-		/*********************Initialize the related variables***********************/
+		
 		stage.add(layer);
 		stage.add(messageLayer);
+		/*********************Initialize the related variables***********************/
+
 		/*********************Circles that indicated the bombs you have**************/		
 		var bonus1 = loadImage(100, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
 		bombList.push(bonus1);
@@ -61,6 +63,19 @@
 		var bonus3 = loadImage(200, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
 		bombList.push(bonus3);
 		/*********************Circles that indicated the bombs you have**************/
+		
+		/******************************Health Bar************************************/
+		var hitTimes = 3;  // The player is allowed to be hitted by up to 3 times, after 3 times it will die
+		var healthBar = new Kinetic.Rect({
+			x: 800,
+			y: 50,
+			width: 180,
+			height: 30,
+			fill: 'green'
+		});
+		layer.add(healthBar);
+		/******************************Health Bar************************************/
+
 		/*********************Moving animation for body*******************************/
 		var animRight = new Kinetic.Animation(function(frame) {
 			// Animation to right
@@ -99,7 +114,7 @@
 			});
 		});
 		/*********************Moving animation for body*******************************/
-		
+
 		/*********************Event for control the body*****************************/
 		window.addEventListener('keydown', function(e) {
 			if (mouseEnable == false) {
@@ -171,17 +186,18 @@
 
 		var basicEnemyId = setInterval(function(){
 			// Create a basic enemy every 0.3 second
-			enemy(layer, enemies, bullets, body, enemyBullets);
+			enemy(layer, enemies, bullets, body, enemyBullets, healthBar);
 		}, 300);
+		
 		var enemyForwardID = setInterval(function(){
 			// Create an enemy plane that shoot bullet downwards every 1 second
-			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets);
+			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar);
 		}, 1000);
 		
 		var bombEnemyID = setInterval(function() {
 			// Create an enemy plane that release bomb every 2 second
-			enemyBomb(layer, enemies, bullets, body, enemyBullets);
-		}, 2000);
+			enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar);
+		}, 500);
 		
 		/*var towardPlayerID = setInterval(function(){
 			enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets);
