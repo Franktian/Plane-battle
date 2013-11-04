@@ -40,7 +40,7 @@
 		var enemies = [];  // Keep track of the enemies
 		var enemyBullets = [];
 		var points = 0;  //  Keep track of the points the player got
-		var protectPlayer = false;
+		var protect = false; //indicates if the protection on or off
 		var i = 0;  // Variable to initialize 360 degree shooting
 		var messageLayer = new Kinetic.Layer();
 		// Add a background image
@@ -143,8 +143,15 @@
 							bombTimes -= 1;
 						}
 						break;
-					case 70:
-						//protection(layer, body, enemyBullets, enemies);
+					case 83: // key: s
+						if(!protect){
+							protect=true;	
+							protection( layer, body, enemyBullets, enemies,protect); // turn on the shield
+						}
+						else{
+							protect = false;
+							remove_protection();	//turn off the shield
+						}
 						break;
 				};
 			}
@@ -186,17 +193,17 @@
 
 		var basicEnemyId = setInterval(function(){
 			// Create a basic enemy every 0.3 second
-			enemy(layer, enemies, bullets, body, enemyBullets, healthBar);
+			enemy(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
 		}, 300);
 		
 		var enemyForwardID = setInterval(function(){
 			// Create an enemy plane that shoot bullet downwards every 1 second
-			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar);
+			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
 		}, 1000);
 		
 		var bombEnemyID = setInterval(function() {
 			// Create an enemy plane that release bomb every 2 second
-			enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar);
+			enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
 		}, 500);
 		
 		/*var towardPlayerID = setInterval(function(){
