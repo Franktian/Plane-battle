@@ -120,6 +120,7 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar) {
 				healthBar.setWidth(healthBar.getWidth() - 30);
 				explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
 				remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
+				body.remove();
 				dead(body.getX(), body.getY(), layer);
 			}
 
