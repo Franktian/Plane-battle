@@ -130,6 +130,55 @@
 		stage.draw();
 	}
 
+	// control the button by keyboard
+	var topimage = "again";	// Variable that indicates the page on the top.
+	window.addEventListener('keydown', function(e) {
+		switch (e.keyCode) {
+			case 37:{
+				buttonSound.play();
+				if(topimage=="back"){
+					again.moveToTop();				
+					topimage="again";
+					stage.draw();
+				}		
+				else if(topimage=="again"){
+					back.moveToTop();
+					topimage="back";
+					stage.draw();
+				}				
+				break;						
+			}
+			case 39:{
+				buttonSound.play();
+				if(topimage=="again"){
+					back.moveToTop();				
+					topimage="back";
+					stage.draw();
+				}		
+				else if(topimage=="back"){
+					again.moveToTop();
+					topimage="again";
+					stage.draw();
+				}				
+				break;						
+			}			
+		}						
+	});
+	window.addEventListener('keyup', function(e) {
+		switch (e.keyCode) {
+			case 13:{
+				buttonSound.play();
+				if(topimage=="again"){
+					window.location.href = "battle.html";				
+				}
+				else if(topimage=="back"){
+					window.location.href = "start-page.html";
+				}
+				break;
+			}			
+		}						
+	});
+
     </script>
 	
   </body>
