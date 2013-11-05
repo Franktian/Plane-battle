@@ -1,3 +1,5 @@
+var circle;  // "shield" which is called by remove_protection() and protection() 
+
 // Display messages on the stage
 function writeMessage(messageLayer, message) {
 	/**
@@ -12,41 +14,44 @@ function writeMessage(messageLayer, message) {
 	context.fillText(message, 500, 25);  // The position to be displayed on the stage
 	//context.fillRect(20,20,150,100);
 };
-
-function protection(layer, body, bullets, enemies) {
+function remove_protection(){
+	circle.remove();
+	this.stop();
+}
+function protection( layer, body, bullets, enemies,protect_on_off) {
 	/**
 	 * Create a temporary protection area
 	 */
-	var circle = new Kinetic.Circle({
-		x: body.getX(),
-		y: body.getY(),
-		radius: 100,
-		fill: 'red',
-		opacity: 0.5,
-	});
-	layer.add(circle);
+	 circle = new Kinetic.Circle({
+			x: body.getX(),
+			y: body.getY(),
+			radius: 100,
+			fill: 'red',
+			opacity: 0.5,
+		});
+		var circleAnim = new Kinetic.Animation(function(frame){
+			circle.setX(body.getX());
+			circle.setY(body.getY());
 	
-	var circleAnim = new Kinetic.Animation(function(frame){
-		circle.setX(body.getX());
-		circle.setY(body.getY());
-
-		for (var i = 0; i < enemies.length; i++) {
-			var distance1 = getDistance(circle.getX(), circle.getY(), enemies[i][0].getX(), enemies[i][0].getY());
-			if (distance1 <= 100) {
-				explosion(enemies[i][0].getX(), enemies[i][0].getY(), layer);
-				remove(enemies, enemies[i][0], enemies[i][1], i);
+			for (var i = 0; i < enemies.length; i++) {
+				var distance1 = getDistance(circle.getX(), circle.getY(), enemies[i][0].getX(), enemies[i][0].getY());
+				if (distance1 <= 100) {
+					explosion(enemies[i][0].getX(), enemies[i][0].getY(), layer);
+					remove(enemies, enemies[i][0], enemies[i][1], i);
+				}
 			}
-		}
-
-		for (var j = 0; j < bullets.length; j++) {
-			var distance2 = getDistance(circle.getX(), circle.getY(), bullets[j][0].getX(), bullets[j][0].getY());
-			if (distance2 <= 100) {
-				explosion(bullets[j][0].getX(), bullets[j][0].getY(), layer);
-				remove(bullets, bullets[j][0], bullets[j][1], j);
+	
+			for (var j = 0; j < bullets.length; j++) {
+				var distance2 = getDistance(circle.getX(), circle.getY(), bullets[j][0].getX(), bullets[j][0].getY());
+				if (distance2 <= 100) {
+					explosion(bullets[j][0].getX(), bullets[j][0].getY(), layer);
+					remove(bullets, bullets[j][0], bullets[j][1], j);
+				}
 			}
-		}
-	}, layer);
-	circleAnim.start();
+		}, layer);
+		layer.add(circle);
+		circleAnim.start();
+		
 };
 
 function createBullet(body, layer, angle, bullets) {
@@ -77,7 +82,7 @@ function createBullet(body, layer, angle, bullets) {
 	bullets.push(bulletPair);
 };
 
-function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar) {
+function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect) {
 	/**
 	 * Function for the enemy plane to shoot bullets
 	 * body: track the coordinate of the player
@@ -99,7 +104,7 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar) {
 		
 		// Check collision with the player plane
 		var distance = getDistance(bullet.getX(), bullet.getY(), body.getX(), body.getY());
-		if (distance <= 30) {
+		if (distance <= 30 && !protect) {
 			// The player lose the game, remove the player plane and the bullet, stop animation			
 			if (healthBar.getWidth("width") > 30) {
 				remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
@@ -120,6 +125,7 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar) {
 				healthBar.setWidth(healthBar.getWidth() - 30);
 				explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
 				remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
+				body.remove();
 				dead(body.getX(), body.getY(), layer);
 			}
 
@@ -137,7 +143,7 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar) {
 	enemyBullets.push(bulletPair);
 };
 
-function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar) {
+function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar,protect) {
 	/**
 	 *	Create a basic enemy plane
 	 */
@@ -147,7 +153,7 @@ function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthB
 
 	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
 	var bulletInt = setInterval(function(){
-		enemyBullet(body, enemy, layer, 90, enemyBullets, healthBar);
+		enemyBullet(body, enemy, layer, 90, enemyBullets, healthBar, protect);
 	}, 800);
 
 	var enemyAnim = new Kinetic.Animation(function(frame) {
@@ -158,7 +164,7 @@ function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthB
 		}
 
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50) {
+		if (distance <= 50 && !protect) {
 			// The player is dead
 			if (healthBar.getWidth("width") > 30) {
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
@@ -208,7 +214,7 @@ function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthB
 	enemyPair.push(enemyAnim);
 	enemies.push(enemyPair);
 }
-function enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets, healthBar) {
+function enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets, healthBar, protect) {
 	/**
 	 *	Create a basic enemy plane
 	 */
@@ -228,7 +234,7 @@ function enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets, healthBa
 		}
 
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50) {
+		if (distance <= 50 && !protect) {
 			if (healthBar.getWidth("width") > 30) {
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
 				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
@@ -277,14 +283,14 @@ function enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets, healthBa
 	enemyPair.push(enemyAnim);
 	enemies.push(enemyPair);
 };
-function enemy(layer, enemies, bullets, body, enemyBullets, healthBar) {
+function enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect) {
 	/**
 	 *	Create a basic enemy plane
 	 */
 	var px = Math.floor((Math.random()*1024) + 1);
 	var py = 0;
 	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
-
+	var speed = Math.floor(Math.random()*(4)+3);
 	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
 
 	var enemyAnim = new Kinetic.Animation(function(frame) {
@@ -294,7 +300,7 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar) {
 		}
 
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50) {
+		if (distance <= 50 && !protect) {
 			// The player is dead
 			if (healthBar.getWidth("width") > 30) {
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
@@ -335,7 +341,7 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar) {
 				remove(bullets, bullets[i][0], bullets[i][1], i);
 			} 
 		}
-		enemy.setY(enemy.getY() + 4);
+		enemy.setY(enemy.getY() + speed);
 	}, layer);
 	enemyAnim.start();
 	var enemyPair = [];
@@ -344,7 +350,7 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar) {
 	enemies.push(enemyPair);
 };
 
-function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar) {
+function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar,protect) {
 	// Function for displaying enemy planes
 
 	// Get a random position for the plane
@@ -365,13 +371,13 @@ function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar) {
 		if (enemy.getY() == bulletY) {
 			var angle;
 			for (angle = 0; angle <= 11; angle++) {
-				enemyBullet(body, enemy, layer, angle * 30, enemyBullets, healthBar);
+				enemyBullet(body, enemy, layer, angle * 30, enemyBullets, healthBar,protect);
 			}
 		}
 		// Define the collision logic here
 		
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50) {
+		if (distance <= 50 && !protect) {
 			// The player is dead
 			if (healthBar.getWidth("width") > 30) {
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
