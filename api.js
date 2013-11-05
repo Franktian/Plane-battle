@@ -290,7 +290,7 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect) 
 	var px = Math.floor((Math.random()*1024) + 1);
 	var py = 0;
 	var bulletY = Math.floor(Math.random()*600); // Get a random position to create the enemy bullets
-
+	var speed = Math.floor(Math.random()*(4)+3);
 	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
 
 	var enemyAnim = new Kinetic.Animation(function(frame) {
@@ -341,7 +341,7 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect) 
 				remove(bullets, bullets[i][0], bullets[i][1], i);
 			} 
 		}
-		enemy.setY(enemy.getY() + 4);
+		enemy.setY(enemy.getY() + speed);
 	}, layer);
 	enemyAnim.start();
 	var enemyPair = [];

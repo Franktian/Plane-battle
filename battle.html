@@ -258,6 +258,7 @@
 					if (healthBar.getWidth() < 180) {
 						level(body.getX(), body.getY(), layer);
 						healthBar.setWidth(healthBar.getWidth() + 50);
+						// Change the health bar colour according to length
 						switch (healthBar.getWidth()) {
 							case 130:
 								healthBar.setFill("yellow");
