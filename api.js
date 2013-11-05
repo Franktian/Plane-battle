@@ -14,13 +14,11 @@ function writeMessage(messageLayer, message) {
 	context.fillText(message, 500, 25);  // The position to be displayed on the stage
 	//context.fillRect(20,20,150,100);
 };
-function remove_protection(){
+function remove_protection(body){
+	shield(body.getX(),body.getY(),layer);
 	circle.remove();
 }
-function protection( layer, body, bullets, enemies,protect_on_off) {
-	/**
-	 * Create a temporary protection area
-	 */
+function create_sheild(body, layer){
 	circle = fire(body.getX(), body.getY(), layer);
 	circle.remove();
 	var circleAnim = new Kinetic.Animation(function(frame){
@@ -29,6 +27,14 @@ function protection( layer, body, bullets, enemies,protect_on_off) {
 	}, layer);
 	layer.add(circle);
 	circleAnim.start();
+};
+function protection( layer, body) {
+	/**
+	 * Create a temporary protection area
+	 */
+	shield(body.getX(),body.getY(),layer);
+	window.setTimeout('create_sheild(body,layer);', 3000);
+
 };
 
 function createBullet(body, layer, angle, bullets) {
@@ -100,7 +106,6 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect
 							break;
 					}
 				  } else {
-					alert("bullet");
 					healthBar.setWidth(healthBar.getWidth() - 30);
 					explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
 					remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
@@ -168,7 +173,6 @@ function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthB
 							break;
 					 }
 				 } else {
-					alert("forward");
 					healthBar.setWidth(healthBar.getWidth() - 30);
 					body.remove();
 					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
@@ -319,7 +323,6 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect) 
 							break;
 					}
 				} else {
-					alert("enemy");
 					healthBar.setWidth(healthBar.getWidth() - 30);
 					body.remove();
 					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
@@ -403,7 +406,6 @@ function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar,protec
 							break;
 					}
 				} else {
-					alert("enebomb");
 					healthBar.setWidth(healthBar.getWidth() - 30);
 					body.remove();
 					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
@@ -552,7 +554,56 @@ function level(x, y, layer) {
 		Level.remove();
 		levelAnim.stop();
 	});
-}
+};
+
+function shield(x, y, layer) {
+	/**
+	 * Create a animation when the shield is on or off
+	 */
+	var animations = {};
+	animations['walkCycle'] = [];
+	var out = 1;
+	for (var i = 0; i < 25; i++) {
+		if (out == 1) {
+			out = 0;
+		} else if (out == 0) {
+			out = 1;
+		}
+		animations['walkCycle'].push({
+			x: 0,
+			y: 0,
+			width: 100 * out,
+			height: 200 * out
+		});
+	}
+	
+	var shieldObj = new Image();
+	shieldObj.src = "pictures/fire.png";
+	var Shield = new Kinetic.Sprite({
+		x: x - 50,
+		y: y - 20,
+		image: shieldObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 10,
+		opacity: 0.5
+	});
+	layer.add(Shield);
+	Shield.start();
+	
+	var shieldAnim = new Kinetic.Animation(function(frame) {
+		Shield.setX(body.getX() - 55);
+		Shield.setY(body.getY() - 50);
+	}, layer);
+	shieldAnim.start();
+	
+	
+	Shield.afterFrame(24, function(){
+		Shield.remove();
+		shieldAnim.stop();
+	});
+
+};
 function dead(x, y, layer) {
 	/**
 	 * Create the dead effect when player plane is dead

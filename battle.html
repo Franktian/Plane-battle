@@ -146,11 +146,11 @@
 					case 83: // key: s
 						if(!protect){
 							protect=true;	
-							protection( layer, body, enemyBullets, enemies,protect); // turn on the shield
+							protection( layer, body); // turn on the shield
 						}
 						else{
 							protect = false;
-							remove_protection();	//turn off the shield
+							remove_protection(body);	//turn off the shield
 						}
 						break;
 				};
