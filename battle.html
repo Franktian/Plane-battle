@@ -238,6 +238,45 @@
 			bonusAnim.start();
 		}, 5000);
 		/*****************************Create bonus bombs*****************************/
+		
+		/****************************Create bonus health*****************************/
+		
+		var healthID = setInterval(function() {
+			/**
+			 * Create a bonus health bar to gain extra health
+			 */
+			var health = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/heart.png", 1, [0, 0], 0);
+			var healthAnim = new Kinetic.Animation(function(frame){
+				if (health.getY() >= 600) {
+					health.remove();
+					this.stop();
+				}
+				var distance = getDistance(body.getX(), body.getY(), health.getX(), health.getY());
+				if (distance <= 35) {
+					health.remove();
+					this.stop();
+					if (healthBar.getWidth() < 180) {
+						level(body.getX(), body.getY(), layer);
+						healthBar.setWidth(healthBar.getWidth() + 50);
+						switch (healthBar.getWidth()) {
+							case 130:
+								healthBar.setFill("yellow");
+								break;
+							case 80:
+								healthBar.setFill("orange");
+								break;
+							case 180:
+								healthBar.setFill("green");
+								break;
+						}
+					}
+				}
+				
+				health.setY(health.getY() + 3);
+			}, layer);
+			healthAnim.start();
+		}, 60000);
+		/****************************Create bonus health*****************************/
 	</script>
 	
   </body>
