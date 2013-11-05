@@ -22,36 +22,29 @@ function protection( layer, body, bullets, enemies,protect_on_off) {
 	/**
 	 * Create a temporary protection area
 	 */
-	 circle = new Kinetic.Circle({
-			x: body.getX(),
-			y: body.getY(),
-			radius: 100,
-			fill: 'red',
-			opacity: 0.5,
-		});
-		var circleAnim = new Kinetic.Animation(function(frame){
-			circle.setX(body.getX());
-			circle.setY(body.getY());
-	
-			for (var i = 0; i < enemies.length; i++) {
-				var distance1 = getDistance(circle.getX(), circle.getY(), enemies[i][0].getX(), enemies[i][0].getY());
-				if (distance1 <= 100) {
-					explosion(enemies[i][0].getX(), enemies[i][0].getY(), layer);
-					remove(enemies, enemies[i][0], enemies[i][1], i);
-				}
+	var circle = fire(body.getX(), body.getY(), layer);
+	var circleAnim = new Kinetic.Animation(function(frame){
+		circle.setX(body.getX() - 50);
+		circle.setY(body.getY() - 50);
+
+		for (var i = 0; i < enemies.length; i++) {
+			var distance1 = getDistance(circle.getX(), circle.getY(), enemies[i][0].getX(), enemies[i][0].getY());
+			if (distance1 <= 100) {
+				explosion(enemies[i][0].getX(), enemies[i][0].getY(), layer);
+				remove(enemies, enemies[i][0], enemies[i][1], i);
 			}
-	
-			for (var j = 0; j < bullets.length; j++) {
-				var distance2 = getDistance(circle.getX(), circle.getY(), bullets[j][0].getX(), bullets[j][0].getY());
-				if (distance2 <= 100) {
-					explosion(bullets[j][0].getX(), bullets[j][0].getY(), layer);
-					remove(bullets, bullets[j][0], bullets[j][1], j);
-				}
+		}
+
+		for (var j = 0; j < bullets.length; j++) {
+			var distance2 = getDistance(circle.getX(), circle.getY(), bullets[j][0].getX(), bullets[j][0].getY());
+			if (distance2 <= 100) {
+				explosion(bullets[j][0].getX(), bullets[j][0].getY(), layer);
+				remove(bullets, bullets[j][0], bullets[j][1], j);
 			}
-		}, layer);
-		layer.add(circle);
-		circleAnim.start();
-		
+		}
+	}, layer);
+	layer.add(circle);
+	circleAnim.start();
 };
 
 function createBullet(body, layer, angle, bullets) {
@@ -582,7 +575,36 @@ function dead(x, y, layer) {
 	});
 };
 
-
+function fire(x, y, layer) {
+	/**
+	 * Create a fire animation
+	 */
+	var animations = {};
+	animations['walkCycle'] = [];
+	for (var i = 0; i < 5; i++) {
+		animations['walkCycle'].push({
+			x: 100 * i,
+			y: 0,
+			width: 100,
+			height: 95
+		});
+	}
+	
+	var fireObj = new Image();
+	fireObj.src = "pictures/fire.png";
+	var fire = new Kinetic.Sprite({
+		x: x - 50,
+		y: y - 50,
+		image: fireObj,
+		animation: 'walkCycle',
+		animations: animations,
+		frameRate: 15,
+		opacity: 0.5
+	});
+	layer.add(fire);
+	fire.start();
+	return fire;
+};
 
 function loadImage(x, y, width, height, layer, url, opacity, offset, rotation) {
 	/**
