@@ -16,32 +16,16 @@ function writeMessage(messageLayer, message) {
 };
 function remove_protection(){
 	circle.remove();
-	this.stop();
 }
 function protection( layer, body, bullets, enemies,protect_on_off) {
 	/**
 	 * Create a temporary protection area
 	 */
-	var circle = fire(body.getX(), body.getY(), layer);
+	circle = fire(body.getX(), body.getY(), layer);
+	circle.remove();
 	var circleAnim = new Kinetic.Animation(function(frame){
 		circle.setX(body.getX() - 50);
 		circle.setY(body.getY() - 50);
-
-		for (var i = 0; i < enemies.length; i++) {
-			var distance1 = getDistance(circle.getX(), circle.getY(), enemies[i][0].getX(), enemies[i][0].getY());
-			if (distance1 <= 100) {
-				explosion(enemies[i][0].getX(), enemies[i][0].getY(), layer);
-				remove(enemies, enemies[i][0], enemies[i][1], i);
-			}
-		}
-
-		for (var j = 0; j < bullets.length; j++) {
-			var distance2 = getDistance(circle.getX(), circle.getY(), bullets[j][0].getX(), bullets[j][0].getY());
-			if (distance2 <= 100) {
-				explosion(bullets[j][0].getX(), bullets[j][0].getY(), layer);
-				remove(bullets, bullets[j][0], bullets[j][1], j);
-			}
-		}
 	}, layer);
 	layer.add(circle);
 	circleAnim.start();
@@ -97,32 +81,40 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect
 		
 		// Check collision with the player plane
 		var distance = getDistance(bullet.getX(), bullet.getY(), body.getX(), body.getY());
-		if (distance <= 30 && !protect) {
-			// The player lose the game, remove the player plane and the bullet, stop animation			
-			if (healthBar.getWidth("width") > 30) {
-				remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
-				explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
-				healthBar.setWidth(healthBar.getWidth() - 50);
-				switch (healthBar.getWidth()) {
-					case 130:
-						healthBar.setFill("yellow");
-						break;
-					case 80:
-						healthBar.setFill("orange");
-						break;
-					case 30:
-						healthBar.setFill("red");
-						break;
+		if (distance <= 30) {
+			if(!protect){   // The protection is off
+				// The player lose the game, remove the player plane and the bullet, stop animation			
+				if (healthBar.getWidth("width") > 30) {
+					remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
+					explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
+					healthBar.setWidth(healthBar.getWidth() - 50);
+					switch (healthBar.getWidth()) {
+						case 130:
+							healthBar.setFill("yellow");
+							break;
+						case 80:
+							healthBar.setFill("orange");
+							break;
+						case 30:
+							healthBar.setFill("red");
+							break;
+					}
+				  } else {
+					alert("bullet");
+					healthBar.setWidth(healthBar.getWidth() - 30);
+					explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
+					remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
+					body.remove();
+					dead(body.getX(), body.getY(), layer);
 				}
-			} else {
-				healthBar.setWidth(healthBar.getWidth() - 30);
-				explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
-				remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
-				body.remove();
-				dead(body.getX(), body.getY(), layer);
 			}
-
+			else{   	//The protection is on, the bullet will disappear when it hits the plane
+				explosion(bullet.getX(), bullet.getY(), layer);
+				remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));			
+			}
 		}
+		
+		
 		// Check boundary, once hit the bound, remove the bullet and stop the animation
 		if (bullet.getY() <= 5 || bullet.getY() >= stage.getAttr("height") - 50 || bullet.getX() <= 50 || bullet.getX() >= stage.getAttr("width") - 50) {
 			remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
@@ -157,32 +149,40 @@ function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthB
 		}
 
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50 && !protect) {
-			// The player is dead
-			if (healthBar.getWidth("width") > 30) {
-				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				healthBar.setWidth(healthBar.getWidth() - 50);
-				switch (healthBar.getWidth()) {
-					case 130:
-						healthBar.setFill("yellow");
-						break;
-					case 80:
-						healthBar.setFill("orange");
-						break;
-					case 30:
-						healthBar.setFill("red");
-						break;
+		if (distance <= 50) {
+			if(!protect){
+				// The player is dead
+				if (healthBar.getWidth("width") > 30) {
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					healthBar.setWidth(healthBar.getWidth() - 50);
+					switch (healthBar.getWidth()) {
+						case 130:
+							healthBar.setFill("yellow");
+							break;
+						case 80:
+							healthBar.setFill("orange");
+							break;
+						case 30:
+							healthBar.setFill("red");
+							break;
+					 }
+				 } else {
+					alert("forward");
+					healthBar.setWidth(healthBar.getWidth() - 30);
+					body.remove();
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					dead(body.getX(), body.getY(), layer);
 				}
-			} else {
-				healthBar.setWidth(healthBar.getWidth() - 30);
-				body.remove();
+			}
+			else{
+				clearInterval(bulletInt);
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				dead(body.getX(), body.getY(), layer);
+				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation				
 			}
 		}
-
+		
 		for (var i = 0; i < bullets.length; i++) {
 			// Get coordinate and distance between bullets and this enemy
 			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
@@ -198,7 +198,7 @@ function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthB
 				// If the bullet hit the bound, remove the bullet and stop its animation
 				remove(bullets, bullets[i][0], bullets[i][1], i);
 			} 
-		}
+		 }		 
 		enemy.setY(enemy.getY() + 4);
 	}, layer);
 	enemyAnim.start();
@@ -227,30 +227,37 @@ function enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets, healthBa
 		}
 
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50 && !protect) {
-			if (healthBar.getWidth("width") > 30) {
+		if (distance <= 50) {
+			if(!protect){
+					if (healthBar.getWidth("width") > 30) {
+						remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+						explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+						healthBar.setWidth(healthBar.getWidth() - 50);
+						switch (healthBar.getWidth()) {
+							case 130:
+								healthBar.setFill("yellow");
+								break;
+							case 80:
+								healthBar.setFill("orange");
+								break;
+							case 30:
+								healthBar.setFill("red");
+								break;
+						}
+					} else {
+						// The player is dead
+						healthBar.setWidth(healthBar.getWidth() - 30);
+						body.remove();
+						remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+						explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+						dead(body.getX(), body.getY(), layer);
+					}
+			}
+			else{
+				clearInterval(bulletInt);
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				healthBar.setWidth(healthBar.getWidth() - 50);
-				switch (healthBar.getWidth()) {
-					case 130:
-						healthBar.setFill("yellow");
-						break;
-					case 80:
-						healthBar.setFill("orange");
-						break;
-					case 30:
-						healthBar.setFill("red");
-						break;
-				}
-			} else {
-				// The player is dead
-				healthBar.setWidth(healthBar.getWidth() - 30);
-				body.remove();
-				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				dead(body.getX(), body.getY(), layer);
-			};
+				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation					
+			}
 		}
 
 		for (var i = 0; i < bullets.length; i++) {
@@ -293,29 +300,36 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect) 
 		}
 
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50 && !protect) {
-			// The player is dead
-			if (healthBar.getWidth("width") > 30) {
-				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				healthBar.setWidth(healthBar.getWidth() - 50);
-				switch (healthBar.getWidth()) {
-					case 130:
-						healthBar.setFill("yellow");
-						break;
-					case 80:
-						healthBar.setFill("orange");
-						break;
-					case 30:
-						healthBar.setFill("red");
-						break;
+		if (distance <= 50) {
+			if(!protect){
+				// The player is dead
+				if (healthBar.getWidth("width") > 30) {
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					healthBar.setWidth(healthBar.getWidth() - 50);
+					switch (healthBar.getWidth()) {
+						case 130:
+							healthBar.setFill("yellow");
+							break;
+						case 80:
+							healthBar.setFill("orange");
+							break;
+						case 30:
+							healthBar.setFill("red");
+							break;
+					}
+				} else {
+					alert("enemy");
+					healthBar.setWidth(healthBar.getWidth() - 30);
+					body.remove();
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					dead(body.getX(), body.getY(), layer);
 				}
-			} else {
-				healthBar.setWidth(healthBar.getWidth() - 30);
-				body.remove();
+			}
+			else{
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				dead(body.getX(), body.getY(), layer);
+				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation				
 			}
 		}
 
@@ -370,29 +384,36 @@ function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar,protec
 		// Define the collision logic here
 		
 		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
-		if (distance <= 50 && !protect) {
+		if (distance <= 50) {
 			// The player is dead
-			if (healthBar.getWidth("width") > 30) {
-				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				healthBar.setWidth(healthBar.getWidth() - 50);
-				switch (healthBar.getWidth()) {
-					case 130:
-						healthBar.setFill("yellow");
-						break;
-					case 80:
-						healthBar.setFill("orange");
-						break;
-					case 30:
-						healthBar.setFill("red");
-						break;
+			if(!protect){
+				if (healthBar.getWidth("width") > 30) {
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					healthBar.setWidth(healthBar.getWidth() - 50);
+					switch (healthBar.getWidth()) {
+						case 130:
+							healthBar.setFill("yellow");
+							break;
+						case 80:
+							healthBar.setFill("orange");
+							break;
+						case 30:
+							healthBar.setFill("red");
+							break;
+					}
+				} else {
+					alert("enebomb");
+					healthBar.setWidth(healthBar.getWidth() - 30);
+					body.remove();
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					dead(body.getX(), body.getY(), layer);
 				}
-			} else {
-				healthBar.setWidth(healthBar.getWidth() - 30);
-				body.remove();
+			}
+			else{
 				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
-				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
-				dead(body.getX(), body.getY(), layer);
+				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation				
 			}
 		}
 
