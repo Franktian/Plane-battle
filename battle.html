@@ -272,11 +272,12 @@
 						}
 					}
 				}
-				
+				var randX = Math.floor((Math.random()*(9))-4);
 				health.setY(health.getY() + 3);
+				health.setX(health.getX() + randX);
 			}, layer);
 			healthAnim.start();
-		}, 60000);
+		}, 1000);
 		/****************************Create bonus health*****************************/
 	</script>
 	
