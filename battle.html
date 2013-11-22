@@ -28,7 +28,7 @@
 				$("span").text(points);
 				
 				// Once the user reach point 100, boss appears!!!!!
-				if (points >= 10) {
+				if (points >= 10000) {
 					for (var i = 0; i < intervalIDs.length; i++) {
 						clearInterval(intervalIDs[i]);
 					}
@@ -65,9 +65,9 @@
 		var mouseEnable = false;
 		var bombTimes = 3;
 		var bombList = [];
-
+		var speed = 1;
 		var intervalIDs = [];
-		
+
 		stage.add(layer);
 		stage.add(messageLayer);
 		/*********************Initialize the related variables***********************/
@@ -105,28 +105,28 @@
 		var animRight = new Kinetic.Animation(function(frame) {
 			// Animation to right
 			if (body.getX() <= stage.getAttr("width") - 80) {
-				body.setX(body.getX() + 5);
+				body.setX(body.getX() + 5 * speed);
 			}  
 		}, layer);
 
 		var animUp = new Kinetic.Animation(function(frame) {
 			// Animation to up
 			if (body.getY() >= 10) {
-				body.setY(body.getY() - 5);
+				body.setY(body.getY() - 5 * speed);
 			}
 		}, layer);
 
 		var animLeft = new Kinetic.Animation(function(frame) {
 			// Animation to left
 			if (body.getX() >= 10) {
-				body.setX(body.getX() - 5);
+				body.setX(body.getX() - 5 * speed);
 			}
 		}, layer);
 
 		var animDown = new Kinetic.Animation(function(frame) {
 			// Animation to down
 			if (body.getY() <= stage.getAttr("height") - 55) {
-			  body.setY(body.getY() + 5);
+			  body.setY(body.getY() + 5 * speed);
 			}
 		}, layer);
 		
@@ -168,16 +168,16 @@
 							bombTimes -= 1;
 						}
 						break;
-					case 83: // key: s
-						if(!protect){
-							protect=true;	
-							protection( layer, body); // turn on the shield
+					/*/case 83: // key: s
+						//if(!protect){
+							//protect=true;	
+							//protection( layer, body); // turn on the shield
 						}
 						else{
 							protect = false;
 							remove_protection(body);	//turn off the shield
 						}
-						break;
+						break;*/
 				};
 			}
 		});
@@ -301,6 +301,41 @@
 		}, 30000);
 		intervalIDs.push(healthID);
 		/****************************Create bonus health*****************************/
+		
+		/************************** Bonus shield**********************************/
+		
+		var shieldID = setInterval(function() {
+			// Create a bonus every 5 seconds
+			var bonus = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/fire.jpg", 1, [0, 0], 0); //which picture?
+			
+			var bonusAnim = new Kinetic.Animation(function(frame) {
+					if (bonus.getY() >= 600) { //if it gets past the bottom of the screen
+							bonus.remove();
+							this.stop();
+					}
+
+					var distance = getDistance(body.getX(), body.getY(), bonus.getX(), bonus.getY());
+					if (distance <= 35) { //if you pick up the bonus
+							bonus.remove();
+							this.stop();
+							if(!protect){ //add protection
+									protect = true;
+									protection(layer, body);
+							}
+							speed = 2; //change speed
+							setTimeout(function() { //remove speed, protection after 5 seconds
+									protect = false;
+									remove_protection(body);
+									speed = 1;
+							}, 5000);
+					}
+					
+					bonus.setY(bonus.getY() + 3);
+			}, layer);
+			bonusAnim.start();
+		}, 5000);
+		intervalIDs.push(shieldID);
+		/************************** Bonus shield**********************************/
 	</script>
 	
   </body>
