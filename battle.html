@@ -35,15 +35,12 @@
 					if(bossAppear ==0){
 						bossAppear = 1;
 					}
-					
-					
 				}
-
 				if(bossAppear == 1){
 					Boss(layer, enemies, bullets, body, enemyBullets, healthBar);
 					bossAppear = -1;
 				}
-			}, 50);
+			}, 100);
 		});
 		/*****************Pointers**********************/
 		/*********************Initialize the related variables***********************/
@@ -251,7 +248,6 @@
 						bombTimes += 1;
 					}
 				}
-				
 				bonus.setY(bonus.getY() + 3);
 			}, layer);
 			bonusAnim.start();
@@ -294,7 +290,7 @@
 				health.setY(health.getY() + 3);
 			}, layer);
 			healthAnim.start();
-		}, 1000);
+		}, 30000);
 		intervalIDs.push(healthID);
 		/****************************Create bonus health*****************************/
 	</script>
