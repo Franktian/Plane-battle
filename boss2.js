@@ -1,3 +1,11 @@
+//Very incomplete, the boss shoots a big slow circle bullet that follows the player
+//HOW TO USE:
+//1. Take out Boss function from api.js
+//2. add <script src="boss2.js" ></script> at the top of battle.html
+
+//PS. I thought it would be better to have a js file for bosses themselves. 
+//The original boss, I have it on a boss.js file on my side.
+
 function Boss(layer, enemies, bullets, body, enemyBullets, healthBar) {
   	// Function for displaying Boss planes
 	var BossHP = 7;
