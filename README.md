@@ -1,3 +1,3 @@
 Attack On Plane
 ===========
-Founding at University of Toronto
+Founded at University of Toronto
