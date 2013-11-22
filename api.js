@@ -713,9 +713,12 @@ function remove(list, object, animation, i) {
 };
 
 
-function Boss(layer, enemies, bullets, body, enemyBullets, healthBar) {
+function Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar) {
   	// Function for displaying Boss planes
 	var BossHP = 7;
+	
+	// Set the boss health bar
+	layer.add(bossHealthBar);
 	setTimeout(function() { // 2 Seconds after all enemy planes have stopped flying in
 	    var px = 512;
 	    var py = 0;
@@ -758,7 +761,32 @@ function Boss(layer, enemies, bullets, body, enemyBullets, healthBar) {
 			    }
 			    // Boss gets hit by player bullet
 			    if (distance2 <= 30) {
-				  BossHP--;
+					BossHP--;
+					if (bossHealthBar.getWidth() > 10) {
+						bossHealthBar.setWidth(bossHealthBar.getWidth() - 30);
+						switch (bossHealthBar.getWidth()) {
+							case 160:
+								bossHealthBar.setFill("FFFF00");
+								break;
+							case 130:
+								bossHealthBar.setFill("FFCC00");
+								break;
+							case 100:
+								bossHealthBar.setFill("FF9900");
+								break;
+							case 70:
+								bossHealthBar.setFill("FF6600");
+							case 40:
+								bossHealthBar.setFill("FF3300");
+								break;
+							case 10:
+								bossHealthBar.setFill("FF0000");
+								break;
+						}
+					} else {
+						bossHealthBar.setWidth(bossHealthBar.getWidth() - 10);
+					}
+
 				  BossAttack1();
 				  explosion(enemy.getX(), enemy.getY(), layer);
 				  remove(bullets, bullets[i][0], bullets[i][1], i);

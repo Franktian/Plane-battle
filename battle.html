@@ -28,7 +28,7 @@
 				$("span").text(points);
 				
 				// Once the user reach point 100, boss appears!!!!!
-				if (points >= 30) {
+				if (points >= 10) {
 					for (var i = 0; i < intervalIDs.length; i++) {
 						clearInterval(intervalIDs[i]);
 					}
@@ -37,10 +37,10 @@
 					}
 				}
 				if(bossAppear == 1){
-					Boss(layer, enemies, bullets, body, enemyBullets, healthBar);
+					Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar);
 					bossAppear = -1;
 				}
-			}, 100);
+			}, 50);
 		});
 		/*****************Pointers**********************/
 		/*********************Initialize the related variables***********************/
@@ -65,7 +65,7 @@
 		var mouseEnable = false;
 		var bombTimes = 3;
 		var bombList = [];
-		
+
 		var intervalIDs = [];
 		
 		stage.add(layer);
@@ -91,6 +91,14 @@
 			fill: 'green'
 		});
 		layer.add(healthBar);
+		
+		var bossHealthBar = new Kinetic.Rect({
+			x: 100,
+			y: 50,
+			width: 190,
+			height: 30,
+			fill: 'green'
+		});
 		/******************************Health Bar************************************/
 
 		/*********************Moving animation for body*******************************/
@@ -226,7 +234,7 @@
 			enemyTowardPlayer(layer, enemies, bullets, body, enemyBullets);
 		}, 1000);*/
 		/*********************Create the enemies*************************************/
-		
+
 		/*****************************Create bonus bombs*****************************/
 		var bombID = setInterval(function() {
 			// Create a bonus every 5 seconds
