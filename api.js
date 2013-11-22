@@ -90,7 +90,7 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect
 		if (distance <= 30) {
 			if(!protect){   // The protection is off
 				// The player lose the game, remove the player plane and the bullet, stop animation			
-				if (healthBar.getWidth("width") > 30) {
+				if (healthBar.getWidth() > 30) {
 					remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
 					explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
 					healthBar.setWidth(healthBar.getWidth() - 50);
@@ -105,7 +105,7 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect
 							healthBar.setFill("red");
 							break;
 					}
-				  } else {
+				  } else if (healthBar.getWidth() > 0) {
 					healthBar.setWidth(healthBar.getWidth() - 30);
 					explosion(bullet.getX(), bullet.getY(), layer);  // Display the explosion animation
 					remove(enemyBullets, bullet, this, enemyBullets.indexOf([bullet, this]));
@@ -711,3 +711,114 @@ function remove(list, object, animation, i) {
 	 object.remove();
 	 animation.stop();
 };
+
+
+function Boss(layer, enemies, bullets, body, enemyBullets, healthBar) {
+  	// Function for displaying Boss planes
+	var BossHP = 7;
+	setTimeout(function() { // 2 Seconds after all enemy planes have stopped flying in
+	    var px = 512;
+	    var py = 0;
+
+	    // Create an enemy variable with random position
+	    var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
+	    var enemyAnim = new Kinetic.Animation(function(frame) {
+		    // Move the Boss plane into position
+		    if (enemy.getY() < stage.getAttr("height")/4){
+			enemy.setY(enemy.getY() + 4);
+		    }
+		    var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
+
+		    if (distance <= 50) {
+			  // The player is dead
+			  body.remove();
+			  remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+			  explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+			  dead(body.getX(), body.getY(), layer);
+		    }
+		    
+		    for (var i = 0; i < bullets.length; i++) {
+			    // Get coordinate and distance between bullets and this enemy
+			    var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
+			    
+			    if ((enemy.getX() > 100) && (enemy.getX() < 924)) {
+				
+				if (bullets[i][0].getY() > enemy.getY()) {
+				    if ((body.getX() < enemy.getX()) && ((enemy.getX() - body.getX()) < 100)) {
+					BossAttack2();
+					enemy.setX(enemy.getX() + 6);
+					break;
+				    }
+				    else if (body.getX() > enemy.getX() && ((body.getX() - enemy.getX()) < 100)) {
+					BossAttack2();
+					enemy.setX(enemy.getX() - 6);
+					break;
+				    }
+				}
+			    }
+			    // Boss gets hit by player bullet
+			    if (distance2 <= 30) {
+				  BossHP--;
+				  BossAttack1();
+				  explosion(enemy.getX(), enemy.getY(), layer);
+				  remove(bullets, bullets[i][0], bullets[i][1], i);
+				  if (BossHP == 0) {
+				      
+				      remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+				      points.value += 100;				
+				      writeMessage(messageLayer, points.value);
+				  } else {
+				      if (body.getX() >= enemy.getX()) {
+					  if ((enemy.getX() - 90) > 100)
+					      enemy.setX(enemy.getX() - 90);
+					  else
+					      enemy.setX(enemy.getX() + 90);
+				      }
+				      else if (body.getX() <= enemy.getX()) {
+					  if ((enemy.getX() + 90) < 924)
+					      enemy.setX(enemy.getX() + 90);
+					  else
+					      enemy.setX(enemy.getX() - 90);
+				      }
+				  }
+			    } else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				    // If the bullet hit the bound, remove the bullet and stop its animation
+				    remove(bullets, bullets[i][0], bullets[i][1], i);
+			    }
+		    }
+		    
+		    
+		    if (enemy.getX() < body.getX()) {
+			  enemy.setX(enemy.getX() + 3);
+		    }
+		    
+		    if (enemy.getX() > body.getX()) {
+			  enemy.setX(enemy.getX() - 3);
+		    }
+		    
+ 		    //Every time the boss gets hit it will do at 360 attack
+		    function BossAttack1() {
+			  var angle;
+			  for (angle = 0; angle <= 20; angle++) {
+			      enemyBullet(body, enemy, layer, angle * 18, enemyBullets, healthBar);
+			  }
+		    }
+		    
+		    //The boss shoots at you directly
+		    function BossAttack2() {
+			  var angle;
+			  var x = enemy.getX() - body.getX();
+			  var y = enemy.getY() - body.getY();
+			  angle = -(Math.atan((x)/(y))/(Math.PI/180) + 270);
+			  enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar);
+		    }
+		    
+	    }, layer);
+	    enemyAnim.start();
+	    
+	    var enemyPair = [];
+	    enemyPair.push(enemy);
+	    enemyPair.push(enemyAnim);
+	    enemies.push(enemyPair);
+	}, 2000);
+}
