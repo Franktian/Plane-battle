@@ -13,7 +13,6 @@
 	<script src="api.js"></script>
   </head>
   <body>
-	<h3>"up", "down", "left", "right" to move, "Space" to BOOM!!!!</h3>
 	<p>Your Score is: <span></span></p>
 	<div id="all">
 		<div id="container"></div>
@@ -26,9 +25,8 @@
 			var bossAppear = 0;
 			setInterval(function() {
 				$("span").text(points);
-				
-				// Once the user reach point 100, boss appears!!!!!
-				if (points >= 10000) {
+				// Once the user reach point 50, boss appears!!!!!
+				if (points >= 50) {
 					for (var i = 0; i < intervalIDs.length; i++) {
 						clearInterval(intervalIDs[i]);
 					}
@@ -37,7 +35,7 @@
 					}
 				}
 				if(bossAppear == 1){
-					Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar);
+					Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar, points);
 					bossAppear = -1;
 				}
 			}, 50);
@@ -48,7 +46,7 @@
 		var stage = new Kinetic.Stage({
 			container: 'container',
 			width: 1024,
-			height: 600
+			height: 580
 		});
 		var layer = new Kinetic.Layer();  // Layer to display what's happening
 		var bullets = [];  // Keep track of the bullets
@@ -301,7 +299,7 @@
 		}, 30000);
 		intervalIDs.push(healthID);
 		/****************************Create bonus health*****************************/
-		
+
 		/************************** Bonus shield**********************************/
 		
 		var shieldID = setInterval(function() {
@@ -327,9 +325,8 @@
 									protect = false;
 									remove_protection(body);
 									speed = 1;
-							}, 5000);
+							}, 8000);
 					}
-					
 					bonus.setY(bonus.getY() + 3);
 			}, layer);
 			bonusAnim.start();

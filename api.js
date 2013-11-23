@@ -713,7 +713,7 @@ function remove(list, object, animation, i) {
 };
 
 
-function Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar) {
+function Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar, points) {
   	// Function for displaying Boss planes
 	var BossHP = 7;
 	
@@ -791,10 +791,12 @@ function Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealth
 				  explosion(enemy.getX(), enemy.getY(), layer);
 				  remove(bullets, bullets[i][0], bullets[i][1], i);
 				  if (BossHP == 0) {
-				      
 				      remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
-				      points.value += 100;				
-				      writeMessage(messageLayer, points.value);
+				      points += 100;
+					  setTimeout(function() {
+						window.location.href = "start-page.html";
+					  }, 1500);
+					  
 				  } else {
 				      if (body.getX() >= enemy.getX()) {
 					  if ((enemy.getX() - 90) > 100)
