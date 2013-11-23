@@ -36,7 +36,6 @@ function protection( layer, body) {
 	window.setTimeout('create_sheild(body,layer);', 3000);
 
 };
-
 function createBullet(body, layer, angle, bullets) {
 	/** 
 	 * Create the bullet at the head of the player plane, specifically body
@@ -64,7 +63,6 @@ function createBullet(body, layer, angle, bullets) {
 	bulletPair.push(animBullet);
 	bullets.push(bulletPair);
 };
-
 function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect) {
 	/**
 	 * Function for the enemy plane to shoot bullets
@@ -132,7 +130,6 @@ function enemyBullet(body, enemy, layer, angle, enemyBullets, healthBar, protect
 	bulletPair.push(animBullet);
 	enemyBullets.push(bulletPair);
 };
-
 function enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar,protect) {
 	/**
 	 *	Create a basic enemy plane
@@ -359,7 +356,6 @@ function enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect) 
 	enemyPair.push(enemyAnim);
 	enemies.push(enemyPair);
 };
-
 function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar,protect) {
 	// Function for displaying enemy planes
 
@@ -445,7 +441,91 @@ function enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar,protec
 	
 	
 };
+function enemyToPlayer(layer, enemies, bullets, body, enemyBullets, healthBar, protect) {
+	/**
+	 *	Create a basic enemy plane
+	 */
+	var px = Math.floor((Math.random()*776) + 1);
+	var py = 0;
+	//var bulletY = Math.floor(Math.random()*580); // Get a random position to create the enemy bullets
+	var speed = 3;
+	var enemy = loadImage(px, py, 30, 40, layer, "pictures/enemy1.png", 1, [15, 20], 180);
 
+	var enemyAnim = new Kinetic.Animation(function(frame) {
+		// Once reach bound, remove the enemy plane
+		if (enemy.getY() >= stage.getAttr("height") + 20){
+			remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+		}
+
+		var distance = getDistance(enemy.getX(), enemy.getY(), body.getX(), body.getY());
+		if (distance <= 50) {
+			if(!protect){
+				// The player is dead
+				if (healthBar.getWidth("width") > 30) {
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					healthBar.setWidth(healthBar.getWidth() - 50);
+					switch (healthBar.getWidth()) {
+						case 130:
+							healthBar.setFill("yellow");
+							break;
+						case 80:
+							healthBar.setFill("orange");
+							break;
+						case 30:
+							healthBar.setFill("red");
+							break;
+					}
+				} else {
+					healthBar.setWidth(healthBar.getWidth() - 30);
+					body.remove();
+					remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+					explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation
+					dead(body.getX(), body.getY(), layer);
+				}
+			}
+			else{
+				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));  // Remove the enemy plane
+				explosion(enemy.getX(), enemy.getY(), layer);  // Display the explosion animation				
+			}
+		}
+
+		for (var i = 0; i < bullets.length; i++) {
+			// Get coordinate and distance between bullets and this enemy
+			var distance2 = getDistance(enemy.getX(), enemy.getY(), bullets[i][0].getX(), bullets[i][0].getY());
+			if (distance2 <= 30) {
+				// Enemy hit by bullets, remove enemy and stop the animation
+				explosion(enemy.getX(), enemy.getY(), layer);
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+				remove(enemies, enemy, this, enemies.indexOf([enemy, this]));
+				points += 1;
+				writeMessage(messageLayer, points);
+			} else if (bullets[i][0].getY() <= 5 || bullets[i][0].getY() >= stage.getAttr("height") - 50 || bullets[i][0].getX() <= 50 || bullets[i][0].getX() >= stage.getAttr("width") - 50) {
+				// If the bullet hit the bound, remove the bullet and stop its animation
+				remove(bullets, bullets[i][0], bullets[i][1], i);
+			} 
+		}
+		
+		// Track the player plane and follow it
+		if (enemy.getY() > body.getY()) {
+			enemy.setY(enemy.getY() - speed);
+		} else {
+			enemy.setY(enemy.getY() + speed);
+		}
+
+		if (enemy.getX() > body.getX()) {
+			enemy.setX(enemy.getX() - speed);
+		} else {
+			enemy.setX(enemy.getX() + speed);
+		}
+		//enemy.setY(enemy.getY() + speed);
+	}, layer);
+	enemyAnim.start();
+	var enemyPair = [];
+	enemyPair.push(enemy);
+	enemyPair.push(enemyAnim);
+	enemies.push(enemyPair);
+};
 function allDegree() {
 	if (i < 36) {
 		window.setTimeout("allDegree()", 10);
@@ -453,7 +533,6 @@ function allDegree() {
 		i++;
 	}
 };
-
 function getDistance(x1, y1, x2, y2) {
 	/** 
 	 * Get the distance between (x1, y1) and (x2, y2)
@@ -463,8 +542,6 @@ function getDistance(x1, y1, x2, y2) {
 	var distance = Math.sqrt(dx + dy);
 	return distance;
 };
-
-
 function explosion(x, y, layer) {
 	/**
 	 * Create an explosion at position (x, y)
@@ -555,7 +632,6 @@ function level(x, y, layer) {
 		levelAnim.stop();
 	});
 };
-
 function shield(x, y, layer) {
 	/**
 	 * Create a animation when the shield is on or off
@@ -646,7 +722,6 @@ function dead(x, y, layer) {
 		window.location.href = "end-page.html";
 	});
 };
-
 function fire(x, y, layer) {
 	/**
 	 * Create a fire animation
@@ -677,7 +752,6 @@ function fire(x, y, layer) {
 	fire.start();
 	return fire;
 };
-
 function loadImage(x, y, width, height, layer, url, opacity, offset, rotation) {
 	/**
 	 * Load an image with the provided url
@@ -701,8 +775,6 @@ function loadImage(x, y, width, height, layer, url, opacity, offset, rotation) {
 	layer.add(image);
 	return image;
 };
-
-
 function remove(list, object, animation, i) {
 	/**
 	 * Remove the object from the list and stop its attached animation
@@ -711,8 +783,6 @@ function remove(list, object, animation, i) {
 	 object.remove();
 	 animation.stop();
 };
-
-
 function Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar, points) {
   	// Function for displaying Boss planes
 	var BossHP = 7;

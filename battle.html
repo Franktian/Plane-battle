@@ -166,16 +166,6 @@
 							bombTimes -= 1;
 						}
 						break;
-					/*/case 83: // key: s
-						//if(!protect){
-							//protect=true;	
-							//protection( layer, body); // turn on the shield
-						}
-						else{
-							protect = false;
-							remove_protection(body);	//turn off the shield
-						}
-						break;*/
 				};
 			}
 		});
@@ -194,13 +184,13 @@
 					animDown.stop();
 					break;
 				case 70:
-					if (mouseEnable == false) {
+					/*if (mouseEnable == false) {
 						animMouse.start();
 						mouseEnable = true;
 					} else {
 						animMouse.stop();
 						mouseEnable = false;
-					}
+					}*/
 					break;
 			}
 		});
@@ -218,6 +208,13 @@
 			enemy(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
 		}, 300);
 		intervalIDs.push(basicEnemyId);
+		
+		var toplayerEnemyID = setInterval(function(){
+			// Create an enemy flies to the player every 1 second
+			enemyToPlayer(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
+		}, 1000);
+		intervalIDs.push(toplayerEnemyID);
+
 		var enemyForwardID = setInterval(function(){
 			// Create an enemy plane that shoot bullet downwards every 1 second
 			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
