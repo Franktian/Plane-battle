@@ -301,7 +301,7 @@
 		
 		var shieldID = setInterval(function() {
 			// Create a bonus every 5 seconds
-			var bonus = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/fire.jpg", 1, [0, 0], 0); //which picture?
+			var bonus = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/smallfire.png", 1, [0, 0], 0); //which picture?
 			
 			var bonusAnim = new Kinetic.Animation(function(frame) {
 					if (bonus.getY() >= 600) { //if it gets past the bottom of the screen
