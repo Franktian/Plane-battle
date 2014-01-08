@@ -1,0 +1,74 @@
+	/*$(document).ready(function(){
+		$('#container').mousemove(function(event){
+			$("span").text(event.pageX + ", " + event.pageY + "New.zindex is " + yoda.getZIndex());
+			if (event.pageX >= 358 && event.pageX <= 623 && event.pageY >= 422 && event.pageY <= 492) {
+				// About us page
+				aboutUs.moveToTop();
+				topimage="aboutUs";
+				stage.draw();
+			}
+			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
+				// New game page
+				yoda.moveToTop();
+				topimage="yoda";
+				stage.draw();
+			}
+			if (event.pageX >= 373 && event.pageX <= 606 && event.pageY >= 512 && event.pageY <= 579) {
+				// Option game page
+				option.moveToTop();
+				topimage="option";
+				stage.draw();
+			}
+		});
+		$(document).click(function(event){
+			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
+				//window.location.href = "battle.html";
+				layer.removeChildren();
+				mouseLayer.removeChildren();
+				stage.draw();
+			}
+		});
+	});*/
+
+		var mouseLayer = new Kinetic.Layer();
+	stage.add(mouseLayer);
+
+	// Variables to play sound
+	var newGame = new Kinetic.Rect({
+		x: 335,
+		y: 275,
+		width: 308,
+		height: 70,
+	});
+	newGame.on('mouseover', function() {
+		var buttonSound = new Audio('audios/button.mp3');
+		buttonSound.play();
+    });
+	newGame.on('mousedown', function() {
+		clickSound.play();
+	});
+	mouseLayer.add(newGame);
+	
+	var us = new Kinetic.Rect({
+		x: 360,
+		y: 372,
+		width: 250,
+		height: 70,
+	});
+	us.on('mouseover', function() {
+		var buttonSound = new Audio('audios/button.mp3');
+		buttonSound.play();
+	});
+	mouseLayer.add(us);
+	
+	var op = new Kinetic.Rect({
+		x: 370,
+		y: 460,
+		width: 230,
+		height: 70,
+	});
+	op.on('mouseover', function() {
+		var buttonSound = new Audio('audios/button.mp3');
+		buttonSound.play();
+	});
+	mouseLayer.add(op);

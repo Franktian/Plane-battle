@@ -8,214 +8,454 @@
 			padding: 0px;
 		}
 		#all {
-			position:relative;
+			width:70%;
+			margin-left:auto;
+			margin-right:auto;
 		}
 		#container {
-			position:absolute;
 			z-index:2;
-		}
-		#test {
-			position:absolute;
-			z-index:3;
-		}
-		#progress {
-			margin-top:620px;
+			margin-left:auto;
+			margin-right:auto;
 		}
     </style>
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-	<link rel="stylesheet" href="/resources/demos/style.css" />
-	<script>
-	</script>
-
+	<script src="javascripts/jquery.js"></script>
+    <script src="javascripts/jquery-ui.js"></script>
+	<script src="javascripts/api.js"></script>
+	<script src="javascripts/enemies.js"></script>
+	<script src="javascripts/boss.js"></script>
+	<script src="javascripts/kinetic.js"></script>
+	<script src="javascripts/timer.js"></script>
   </head>
   <body>
-  <p>Mouse is at coordinates: <span></span>.</p>
 	<div id="all">
 		<div id="container"></div>
 	</div>
-	<div id="progress"></div>
-    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
+    <p id="points">Your Score is: <span></span></p>
     <script defer="defer">
-	var buttonSound = new Audio('audios/button.mp3');
-	var clickSound = new Audio('audios/click.mp3');
-	$(document).ready(function(){
+	
+		var gamemode = false;
+		/***************Initialization*****************/
+		var clickSound = new Audio('audios/click.mp3');
+		var bullets = [];  // Keep track of the bullets
+		var enemies = [];  // Keep track of the enemies
+		var enemyBullets = [];
+		var points = 0;  //  Keep track of the points the player got
+		var protect = false; //indicates if the protection on or off
+		var i = 0;  // Variable to initialize 360 degree shooting
+		var messageLayer = new Kinetic.Layer();
+		var mouseEnable = false;
+		var bombTimes = 3;
+		var bombList = [];
+		var speed = 1;
+		var body;
+		var intervalIDs = [];
+		var notDead = true;
+		var bossAppear = 0;
+		/***************Initialization*****************/
 		
-		$('#container').mousemove(function(event){
-			$("span").text(event.pageX + ", " + event.pageY + "New.zindex is " + yoda.getZIndex());
-			if (event.pageX >= 358 && event.pageX <= 623 && event.pageY >= 422 && event.pageY <= 492) {
-				// About us page
-				aboutUs.moveToTop();
-				topimage="aboutUs";
-				stage.draw();
-			}
-			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
-				// New game page
-				yoda.moveToTop();
-				topimage="yoda";
-				stage.draw();
-			}
-			if (event.pageX >= 373 && event.pageX <= 606 && event.pageY >= 512 && event.pageY <= 579) {
-				// Option game page
-				
-				option.moveToTop();
-				topimage="option";
-				stage.draw();
-			}
+		/****************Health Bar*******************/
+		var healthBar = new Kinetic.Rect({
+			x: 500,
+			y: 50,
+			width: 180,
+			height: 30,
+			fill: 'green'
 		});
-		$(document).click(function(event){
-			if (event.pageX >= 330 && event.pageX <= 646 && event.pageY >= 326 && event.pageY <= 395) {
-				window.location.href = "battle.html";
-			}
+		
+		var bossHealthBar = new Kinetic.Rect({
+			x: 100,
+			y: 50,
+			width: 190,
+			height: 30,
+			fill: 'green'
 		});
-	});
-
-	var topimage = "yoda";	// Variable that indicates the page on the top.
-	window.addEventListener('keyup', function(e) {
-		switch (e.keyCode) {
-			case 38:{
-				buttonSound.play();
-				if(topimage=="aboutUs"){
-					yoda.moveToTop();				
-					topimage="yoda";
-					stage.draw();
-				}		
-				else if(topimage=="option"){
-					aboutUs.moveToTop();
-					topimage="aboutUs";
-					stage.draw();
-				}
-				else if(topimage=="yoda"){
-					option.moveToTop();
-					topimage="option";
-					stage.draw();
-				}					
-				break;						
-			}
-			case 40:{
-				buttonSound.play();
-				if(topimage=="aboutUs"){
-					option.moveToTop();
-					topimage="option";
-					stage.draw();
-				}		
-				else if(topimage=="yoda"){ 
+		/****************Health Bar*******************/
+		var shield;
+		var shieldAnim;
+		/*********************Start-page control********************************/
+		var topimage = "yoda";	// Variable that indicates the page on the top.
+		window.addEventListener('keyup', function(e) {
+			switch (e.keyCode) {
+				case 38:{
+					var buttonSound = new Audio('audios/button.mp3');
 					buttonSound.play();
-					aboutUs.moveToTop();
-					topimage="aboutUs"; 
-					stage.draw(); 
+					if(topimage=="aboutUs"){
+						yoda.moveToTop();
+						topimage="yoda";
+					}		
+					else if(topimage=="option"){
+						aboutUs.moveToTop();
+						topimage="aboutUs";
+					}
+					else if(topimage=="yoda"){
+						option.moveToTop();
+						topimage="option";
+					}					
+					break;						
 				}
-				else if(topimage=="option"){
-					yoda.moveToTop();
-					topimage="yoda";
-					stage.draw();
+				case 40:{
+					var buttonSound = new Audio('audios/button.mp3');
+					buttonSound.play();
+					if(topimage=="aboutUs"){
+						option.moveToTop();
+						topimage="option";
+					}		
+					else if(topimage=="yoda"){ 
+						buttonSound.play();
+						aboutUs.moveToTop();
+						topimage="aboutUs"; 
+					}
+					else if(topimage=="option"){
+						yoda.moveToTop();
+						topimage="yoda";
+					}
+					break;			
 				}
-				break;			
-			}
-			case 13:{
-				if(topimage=="yoda")
-					window.location.href = "battle.html";
-			}
-		}						
-	});
+				case 13:{
+					if(topimage=="yoda") {
+						clickSound.play();
+						layer.removeChildren();
+						
+						var background = loadImage(0, 0, stage.getWidth(), stage.getHeight(), layer, "pictures/background.jpg", 1, [0, 0], 0);
+						body = loadImage(stage.getWidth()/2, stage.getHeight()/2, 80, 100, layer, "pictures/ourplane.png", 1, [40, 50], 0);
+						
+						
+						/*********************Moving animation for body*******************************/
+						var animRight = new Kinetic.Animation(function(frame) {
+							// Animation to right
+							if (body.getX() <= stage.getAttr("width") - 80) {
+								body.setX(body.getX() + 5 * speed);
+							}  
+						}, layer);
 
-		
-	var stage = new Kinetic.Stage({
-		container: 'container',
-		width: 960,
-		height: 600
-	});
-	var layer = new Kinetic.Layer();
+						var animUp = new Kinetic.Animation(function(frame) {
+							// Animation to up
+							if (body.getY() >= 10) {
+								body.setY(body.getY() - 5 * speed);
+							}
+						}, layer);
 
-      
-	  
-	var aboutUsObj = new Image();
-	aboutUsObj.src = "pictures/aboutus.jpg";
-	var aboutUs = new Kinetic.Image({
-		x: 0,
-		y: 0,
-		image: aboutUsObj,
-		width: 960,
-		height: 600
-	});
-	layer.add(aboutUs);
-	
-	
-	var optionObj = new Image();
-	optionObj.src = "pictures/options.jpg";
-	var option = new Kinetic.Image({
-		x: 0,
-		y: 0,
-		image: optionObj,
-		width: 960,
-		height: 600
-	});
-	layer.add(option);
-	
-	var imageObj = new Image();
-	imageObj.src = "pictures/newgame.jpg";
-	var yoda = new Kinetic.Image({
-	  x: 0,
-	  y: 0,
-	  image: imageObj,
-	  width: 960,
-	  height: 600,
-	  opacity: 1
-	});
-	// add the shape to the layer
-	layer.add(yoda);
-	var mouseLayer = new Kinetic.Layer();
-	stage.add(mouseLayer);
-	
-	// Variables to play sound
-	var newGame = new Kinetic.Rect({
-		x: 335,
-		y: 275,
-		width: 308,
-		height: 70,
-	});
-	newGame.on('mouseover', function() {
-		buttonSound.play();
-    });
-	newGame.on('mousedown', function() {
-		clickSound.play();
-	});
-	mouseLayer.add(newGame);
-	
-	var us = new Kinetic.Rect({
-		x: 360,
-		y: 372,
-		width: 250,
-		height: 70,
-	});
-	us.on('mouseover', function() {
-		buttonSound.play();
-	});
-	mouseLayer.add(us);
-	
-	var op = new Kinetic.Rect({
-		x: 370,
-		y: 460,
-		width: 230,
-		height: 70,
-	});
-	op.on('mouseover', function() {
-		buttonSound.play();
-	});
-	mouseLayer.add(op);
-	stage.add(layer);
-	stage.add(mouseLayer);
-	
-	// When loaded the page, draw the stage immediately
-	window.onload = function() {
-		var start = Date.now();
-		$( "#progress" ).progressbar({
-			value: Date.now() - start
+						var animLeft = new Kinetic.Animation(function(frame) {
+							// Animation to left
+							if (body.getX() >= 10) {
+								body.setX(body.getX() - 5 * speed);
+							}
+						}, layer);
+
+						var animDown = new Kinetic.Animation(function(frame) {
+							// Animation to down
+							if (body.getY() <= stage.getAttr("height") - 55) {
+							  body.setY(body.getY() + 5 * speed);
+							}
+						}, layer);
+						
+						/*********************Moving animation for body*******************************/
+
+						/*********************Event for control the body*****************************/
+						window.addEventListener('keydown', function(e) {
+							if (mouseEnable == false) {
+								switch (e.keyCode) {
+									case 37:
+										// Left
+										animLeft.start();
+										break;
+									case 38:
+										// Up
+										animUp.start();
+										break;
+									case 39:
+										// Right
+										animRight.start();
+										break;
+									case 40:
+										// Down
+										animDown.start();
+										break;
+									case 32:
+										if (bombTimes > 0) {
+											i = 0;
+											allDegree();
+											bombList[bombTimes - 1].hide();
+											bombTimes -= 1;
+										}
+										break;
+								};
+							}
+						});
+						window.addEventListener('keyup', function(e) {
+							switch (e.keyCode) {
+								case 37:
+									animLeft.stop();
+									break;
+								case 38:
+									animUp.stop();
+									break;
+								case 39:
+									animRight.stop();
+									break;
+								case 40:
+									animDown.stop();
+									break;
+							}
+						});
+						/*********************Event for control the body*****************************/
+						/***************** Shield*********************/
+						shield = new Kinetic.Circle({
+							x: body.getX(),
+							y: body.getY(),
+							radius: 80,
+							fill: 'green',
+							opacity: 0.5
+						});
+
+						shieldAnim = new Kinetic.Animation(function(frame){
+							shield.setX(body.getX());
+							shield.setY(body.getY());
+						}, layer);
+						layer.add(shield);
+						shield.hide();
+						/***************** Shield*********************/
+						/*********************Circles that indicated the bombs you have**************/		
+						var bonus1 = loadImage(100, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
+						bombList.push(bonus1);
+						var bonus2 = loadImage(150, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
+						bombList.push(bonus2);
+						var bonus3 = loadImage(200, 500, 40, 40, layer, "pictures/bomb.png", 1, [0, 0], 0);
+						bombList.push(bonus3);
+						/*********************Circles that indicated the bombs you have**************/
+
+
+						// Remove the original event listener that change the cover pictures
+						this.removeEventListener('keyup', arguments.callee, false);
+						layer.add(healthBar);
+						bulletId.play();  // Start the interval that create the player bullets
+						firstEnemy.play();
+						secondEnemy.play();
+						//thirdEnemy.play();
+						forthEnemy.play();
+						//shieldID.play();
+						//healthID.play();
+						bombID.play();
+						$("#points").show();
+					}
+				}
+			}
 		});
-		stage.draw();
-	};
 
+		var stage = new Kinetic.Stage({
+			container: 'container',
+			width: 960,
+			height: 600
+		});
+		var layer = new Kinetic.Layer();
+		var aboutUsObj = new Image();
+		aboutUsObj.src = "pictures/aboutus.jpg";
+		var aboutUs = new Kinetic.Image({
+			x: 0,
+			y: 0,
+			image: aboutUsObj,
+			width: 960,
+			height: 600
+		});
+		layer.add(aboutUs);
+		var optionObj = new Image();
+		optionObj.src = "pictures/options.jpg";
+		var option = new Kinetic.Image({
+			x: 0,
+			y: 0,
+			image: optionObj,
+			width: 960,
+			height: 600
+		});
+		layer.add(option);
+		var imageObj = new Image();
+		imageObj.src = "pictures/newgame.jpg";
+		var yoda = new Kinetic.Image({
+		  x: 0,
+		  y: 0,
+		  image: imageObj,
+		  width: 960,
+		  height: 600,
+		  opacity: 1
+		});
+		// add the shape to the layer
+		layer.add(yoda);
+		stage.add(layer);
+		/*********************Start-page control********************************/
+
+
+		/*********************Drawing the canvas every 0.01s********************/
+		var drawpage = $.timer(function() {
+			stage.draw();
+			$("span").text(points);
+			if (healthBar.getWidth("width") == 0 && notDead) {
+				dead(body.getX(), body.getY(), layer, intervalIDs);
+				notDead = false;
+			}
+			if (points >= 20) {
+				for (var i = 0; i < intervalIDs.length; i++) {
+					intervalIDs[i].stop();
+				}
+				if(bossAppear ==0){
+					bossAppear = 1;
+				}
+			}
+			if(bossAppear == 1){
+				Boss(layer, enemies, bullets, body, enemyBullets, healthBar, bossHealthBar, points);
+				bossAppear = -1;
+			}
+		}, 20, true);
+		/*********************Drawing the canvas every 0.01s********************/
+		
+		/*************************** Set of drawing ****************************/
+		var bulletId = $.timer(function(){
+			// Create a bullet every 0.25 second
+			createBullet(stage, body, layer, 270, bullets);
+		}, 250, true);
+		//intervalIDs.push(bulletId);
+		
+		var firstEnemy = $.timer(function(){
+			// Create a basic enemy
+			enemy(layer, enemies, bullets, body, enemyBullets, healthBar);
+		}, 300, true);
+		intervalIDs.push(firstEnemy);
+
+		var secondEnemy = $.timer(function(){
+			// Create a basic enemy
+			enemyBomb(layer, enemies, bullets, body, enemyBullets, healthBar, protect);
+		}, 1000, true);
+		intervalIDs.push(secondEnemy);
+		
+		var thirdEnemy = $.timer(function(){
+			// Create a basic enemy
+			enemyToPlayer(layer, enemies, bullets, body, enemyBullets, healthBar, protect);
+		}, 200, true);
+		intervalIDs.push(thirdEnemy);
+		
+		var forthEnemy = $.timer(function(){
+			// Create a basic enemy
+			enemyForwardBullet(layer, enemies, bullets, body, enemyBullets, healthBar, protect);
+		}, 200, true);
+		intervalIDs.push(forthEnemy);
+		
+		
+		/************************** Bonus shield**********************************/
+		
+		var shieldID = $.timer(function() {
+			// Create a bonus every 5 seconds
+			var bonus = loadImage(Math.floor((Math.random()*960)), 0, 20, 20, layer, "pictures/smallfire.png", 1, [0, 0], 0); //which picture?
+			
+			var bonusAnim = new Kinetic.Animation(function(frame) {
+				if (bonus.getY() >= 600) { //if it gets past the bottom of the screen
+					bonus.remove();
+					this.stop();
+				}
+
+				var distance = getDistance(body.getX(), body.getY(), bonus.getX(), bonus.getY());
+				if (distance <= 35) { //if you pick up the bonus
+					bonus.remove();
+					this.stop();
+					if(!protect){ //add protection
+						protect = true;
+						shield.show();
+						shieldAnim.start();
+					
+						speed = 3; //change speed
+						setTimeout(function() { //remove speed, protection after 5 seconds
+							protect = false;
+							speed = 1;
+							shield.hide();
+							shieldAnim.stop();
+						}, 5000);
+					}
+				}
+				bonus.setY(bonus.getY() + 3);
+			}, layer);
+			bonusAnim.start();
+		}, 500, true);
+		intervalIDs.push(shieldID);
+		/************************** Bonus shield**********************************/
+		/****************************Create bonus health*****************************/
+		
+		var healthID = $.timer(function() {
+			/**
+			 * Create a bonus health bar to gain extra health
+			 */
+			var health = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/heart.png", 1, [0, 0], 0);
+			var healthAnim = new Kinetic.Animation(function(frame){
+				if (health.getY() >= 600) {
+					health.remove();
+					this.stop();
+				}
+				var distance = getDistance(body.getX(), body.getY(), health.getX(), health.getY());
+				if (distance <= 35) {
+					health.remove();
+					this.stop();
+					if (healthBar.getWidth() < 180) {
+						level(body.getX(), body.getY(), layer);
+						healthBar.setWidth(healthBar.getWidth() + 50);
+						// Change the health bar colour according to length
+						switch (healthBar.getWidth()) {
+							case 130:
+								healthBar.setFill("yellow");
+								break;
+							case 80:
+								healthBar.setFill("orange");
+								break;
+							case 180:
+								healthBar.setFill("green");
+								break;
+						}
+					}
+				}
+				health.setY(health.getY() + 3);
+			}, layer);
+			healthAnim.start();
+		}, 300, true);
+		intervalIDs.push(healthID);
+		/****************************Create bonus health*****************************/
+		/*****************************Create bonus bombs*****************************/
+		var bombID = $.timer(function() {
+			// Create a bonus every 5 seconds
+			var bonus = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/bomb.png", 1, [0, 0], 0);
+			
+			var bonusAnim = new Kinetic.Animation(function(frame) {
+				if (bonus.getY() >= 600) {
+					bonus.remove();
+					this.stop();
+				}
+				// If the player get this bonus, then he got an extra bomb!
+				var distance = getDistance(body.getX(), body.getY(), bonus.getX(), bonus.getY());
+				if (distance <= 35) {
+					bonus.remove();
+					this.stop();
+					if (bombTimes < 3) {
+						level(body.getX(), body.getY(), layer);
+						bombList[bombTimes].show();
+						bombTimes += 1;
+					}
+				}
+				bonus.setY(bonus.getY() + 3);
+			}, layer);
+			bonusAnim.start();
+		}, 500, true);
+		intervalIDs.push(bombID);
+		/*****************************Create bonus bombs*****************************/
+
+
+		/*************************** Set of drawing ****************************/
+		
+		$(document).ready(function () {
+			bulletId.pause();
+			firstEnemy.pause();
+			secondEnemy.pause();
+			thirdEnemy.pause();
+			forthEnemy.pause();
+			shieldID.pause();
+			healthID.pause();
+			bombID.pause();
+			$("#points").hide();
+		});
     </script>
 	
   </body>

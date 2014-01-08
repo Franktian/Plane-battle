@@ -1,23 +1,24 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
     <style>
 		body {
 			margin: 0px;
 			padding: 0px;
 		}
     </style>
-	<script src="http://code.jquery.com/jquery-1.8.2.js"></script>
-    <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
-	<script src="api.js"></script>
+	<script src="javascripts/jquery.js"></script>
+    <script src="javascripts/jquery-ui.js"></script>
+	<script src="javascripts/api.js"></script>
+	<script src="javascripts/enemies.js"></script>
+	<script src="javascripts/boss.js"></script>
+	<script src="javascripts/kinetic.js"></script>
   </head>
   <body>
 	<p>Your Score is: <span></span></p>
 	<div id="all">
 		<div id="container"></div>
 	</div>
-    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v4.7.2.min.js"></script>
     <script>
 		/*****************Pointers**********************/
 		$(document).ready(function(){
@@ -128,14 +129,6 @@
 			}
 		}, layer);
 		
-		
-		// Control the player plane with mouse
-		var animMouse = new Kinetic.Animation(function(frame) {
-			$('#container').mousemove(function(event) {
-				body.setX(event.pageX);
-				body.setY(event.pageY - 150);
-			});
-		});
 		/*********************Moving animation for body*******************************/
 
 		/*********************Event for control the body*****************************/
@@ -200,12 +193,12 @@
 		var bulletId = setInterval(
 			// Create a bullet every 0.25 second
 			function(){
-				createBullet(body, layer, 270, bullets);
+				createBullet(stage, body, layer, 270, bullets);
 			}
 		, 250);
 		var basicEnemyId = setInterval(function(){
 			// Create a basic enemy every 0.3 second
-			enemy(layer, enemies, bullets, body, enemyBullets, healthBar,protect);
+			enemy(layer, enemies, bullets, body, enemyBullets, healthBar, protect);
 		}, 300);
 		intervalIDs.push(basicEnemyId);
 		
@@ -301,7 +294,7 @@
 		
 		var shieldID = setInterval(function() {
 			// Create a bonus every 5 seconds
-			var bonus = loadImage(Math.floor((Math.random()*1024)), 0, 20, 20, layer, "pictures/smallfire.png", 1, [0, 0], 0); //which picture?
+			var bonus = loadImage(Math.floor((Math.random()*960)), 0, 20, 20, layer, "pictures/smallfire.png", 1, [0, 0], 0); //which picture?
 			
 			var bonusAnim = new Kinetic.Animation(function(frame) {
 					if (bonus.getY() >= 600) { //if it gets past the bottom of the screen
